@@ -1,0 +1,6 @@
+.DS_STORE
+.idea
+out*
+osmedeus
+dist/*
+osmedeusdev

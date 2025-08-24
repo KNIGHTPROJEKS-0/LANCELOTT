@@ -1,0 +1,368 @@
+{% extends "aws/layout.html" %}
+{% block body %}
+<div class="main-panel" >
+   <div class="content-wrapper ">
+     <div class="row">
+       <div class="col-sm-12">
+         <div class="home-tab">
+           <div class="d-sm-flex align-items-center justify-content-between border-bottom">
+               <a class="nav-link text-warning ps-0" id="home-tab" aria-selected="true">Total Enumerated Data</a>
+             <div>
+               <div class="btn-wrapper">
+                  <a href="https://twitter.com/intent/tweet?screen_name=trouble1_raunak%20created%20an%20Azure%20cloud%20attacking%20toolkit%20-%20Vajra&ref_src=twsrc%5Etfw" target='_blank' class="btn btn-outline-dark align-items-center"><i class="icon-share"></i> Share on twitter</a>
+               </div>
+             </div>
+           </div>
+           <div class="tab-content tab-content-basic">
+             <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview"> 
+               <div class="row">
+                 <div class="col-sm-12">
+                   <div class="statistics-details d-flex align-items-center justify-content-between">
+                     <div>
+                       <p class="statistics-title">S3 Buckets</p>
+                       <h3 class="rate-percentage">{{user_data.s3buckets}}</h3>
+                     </div>
+                     <div>
+                       <p class="statistics-title">Valid Users</p>
+                       <h3 class="rate-percentage">{{user_data.iamUsers}}</h3>
+                     </div>
+                     <!--
+                     <div>
+                       <p class="statistics-title">Misconfig EBS</p>
+                       <h3 class="rate-percentage">6</h3>
+                     </div>-->
+                     <div class="d-none d-md-block">
+                       <p class="statistics-title">EC2</p>
+                       <h3 class="rate-percentage">{{user_data.ec2}}</h3>
+                     </div>
+                     <div class="d-none d-md-block">
+                       <p class="statistics-title">S3 Scanner</p>
+                       <h3 class="rate-percentage">{{user_data.buckets | length}}</h3>
+                     </div>
+                   </div>
+                 </div>
+               </div> 
+               <div class="row">
+                  <div class="col-lg-8 d-flex flex-column">
+                     <div class="row flex-grow">
+                       <div class="col-12 grid-margin stretch-card">
+                         <div class="card card-rounded">
+                           <div class="card-body">
+                             <div class="d-sm-flex justify-content-between align-items-start">
+                               <div>
+                                 <h4 class="card-title card-title-dash">IAM Enumerated Users
+                               </div>
+                               <div id="performance-line-legend"><div class="chartjs-legend">
+                                 <a href="" class="fw-bold text-primary">Show all <i class="mdi mdi-arrow-right ms-2"></i></a>
+                                 </div>
+                               </div>
+                             </div>
+                             <div class="table-responsive  mt-1">
+                               <table class="table select-table">
+                                 <thead>
+                                   <tr>
+                                     <th>IAM User</th>
+                                     <th>Key ID</th>
+                                     <th>Status</th>
+                                   </tr>
+                                 </thead>
+                                 <tbody>
+                                    {% for victim in user_data.iam_victim_data %}
+                                    <tr>
+                                        <td>
+                                        <div class="d-flex">
+                                            <h6>{{ victim.victim.split("/")[1] }}</h6>
+                                        </div>
+                                        </td>
+                                        
+                                        <td>
+                                        <div>
+                                            <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
+                                            <p>{{ victim.key }}</p>
+                                            </div>
+                                           
+                                        </div>
+                                        </td>
+                                        <td>
+                                          <div id="{{victim.key}}">
+                                          {% if victim.enumStatus == "progress" %}
+                                          
+                                          <img class="rotating" src="{{ url_for('static',filename='images/common/inprogres.png') }}" width="40px">
+                                          <span style="color: rgb(2, 160, 2);">In Progress</span>
+                                          {% elif victim.enumStatus == "completed" %}
+                                          <img src="{{ url_for('static',filename='images/common/completed.png') }}" width="40px">
+                                          {% endif %}
+                                        </div>
+                                        </td>
+                                        </tr>
+                                        <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
+                                        {% if victim.enumStatus == "progress" %}
+                                        <script>
+                                          setInterval(function(){ 
+                                         var xmlHttp = new XMLHttpRequest();
+                                         xmlHttp.open( "GET", "{{url_for('getEnumStatus', victimId=victim.userId)}}", false ); xmlHttp.send( null );
+                                         if(xmlHttp.responseText == "completed"){
+                                         document.getElementById("{{victim.key}}").innerHTML = `<img src="{{ url_for('static',filename='images/common/completed.png') }}" width="40px"><span style="color: rgb(0, 197, 247);">Completed</span>`;
+                                        }}, 1000);
+                                        </script>
+                                        {% endif %}
+                                  {% endfor %}
+                                 </tbody>
+                               </table>
+                               
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                     </div>
+                 <div class="col-lg-4 d-flex flex-column">
+                   <div class="row flex-grow">
+                     <div class="col-md-6 col-lg-12 grid-margin stretch-card">
+                       <div class="card card-rounded" style="background-color: #232f3e;">
+                         <div class="card-body pb-0">
+                           <h4 class="card-title card-title-dash text-white mb-4">Enumerated Summary</h4>
+                           <div class="row">
+                             <div class="col-sm-4">
+                               <p class="status-summary-ight-white mb-1">Total IAM users</p>
+                               <h2 class="text-warning">{{user_data.total_iam_victm }}</h2>
+                             </div>
+                             <div class="col-sm-8">
+                               <div class="status-summary-chart-wrapper pb-4">
+                                 <canvas id="status-summary" style="display: block; height: 66px; width: 154px;" width="192" height="82" class="chartjs-render-monitor"></canvas>
+                               </div>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                     <div class="col-md-6 col-lg-12 grid-margin stretch-card">
+                       <div class="card card-rounded">
+                         <div class="card-body">
+                           <div class="row">
+                            <div class="col-sm-6">
+                              <div class="d-flex justify-content-between align-items-center mb-2 mb-sm-0">
+                                <img src="{{ url_for('static',filename='images/sprites/red.png') }}" alt="logo" />
+                                <div class="text-danger">
+                                  <p class="text-small mb-2">Non-Complaint</p>
+                                  <h4 class="mb-0fw-bold">{{user_data.nonComplaint}}</h4>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-sm-6">
+                              <div class="d-flex justify-content-between align-items-center mb-2 mb-sm-0">
+                                <img src="{{ url_for('static',filename='images/sprites/green.png') }}" alt="logo" />
+                                <div class="text-success">
+                                  <p class="text-small mb-2">Non-Complaint</p>
+                                  <h4 class="mb-0 fw-bold">{{user_data.complaint}}</h4>
+                                </div>
+                              </div>
+                            </div>
+
+                              </div>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+               <!--
+               <div class="row">
+                 <div class="col-lg-8 d-flex flex-column">
+                   
+             
+                   <div class="row flex-grow">
+                     <div class="col-md-6 col-lg-6 grid-margin stretch-card">
+                       <div class="card card-rounded">
+                         <div class="card-body card-rounded">
+                           <h4 class="card-title  card-title-dash">Recent Events</h4>
+                           <div class="list align-items-center border-bottom py-2">
+                             <div class="wrapper w-100">
+                               <p class="mb-2 font-weight-medium">
+                                 Change in Directors
+                               </p>
+                               <div class="d-flex justify-content-between align-items-center">
+                                 <div class="d-flex align-items-center">
+                                   <i class="mdi mdi-calendar text-muted me-1"></i>
+                                   <p class="mb-0 text-small text-muted">Mar 14, 2019</p>
+                                 </div>
+                               </div>
+                             </div>
+                           </div>
+                           <div class="list align-items-center border-bottom py-2">
+                             <div class="wrapper w-100">
+                               <p class="mb-2 font-weight-medium">
+                                 Other Events
+                               </p>
+                               <div class="d-flex justify-content-between align-items-center">
+                                 <div class="d-flex align-items-center">
+                                   <i class="mdi mdi-calendar text-muted me-1"></i>
+                                   <p class="mb-0 text-small text-muted">Mar 14, 2019</p>
+                                 </div>
+                               </div>
+                             </div>
+                           </div>
+                           <div class="list align-items-center border-bottom py-2">
+                             <div class="wrapper w-100">
+                               <p class="mb-2 font-weight-medium">
+                                 Quarterly Report
+                               </p>
+                               <div class="d-flex justify-content-between align-items-center">
+                                 <div class="d-flex align-items-center">
+                                   <i class="mdi mdi-calendar text-muted me-1"></i>
+                                   <p class="mb-0 text-small text-muted">Mar 14, 2019</p>
+                                 </div>
+                               </div>
+                             </div>
+                           </div>
+                           <div class="list align-items-center border-bottom py-2">
+                             <div class="wrapper w-100">
+                               <p class="mb-2 font-weight-medium">
+                                 Change in Directors
+                               </p>
+                               <div class="d-flex justify-content-between align-items-center">
+                                 <div class="d-flex align-items-center">
+                                   <i class="mdi mdi-calendar text-muted me-1"></i>
+                                   <p class="mb-0 text-small text-muted">Mar 14, 2019</p>
+                                 </div>
+                               </div>
+                             </div>
+                           </div>
+                           
+                           <div class="list align-items-center pt-3">
+                             <div class="wrapper w-100">
+                               <p class="mb-0">
+                                 <a href="#" class="fw-bold text-primary">Show all <i class="mdi mdi-arrow-right ms-2"></i></a>
+                               </p>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                     <div class="col-md-6 col-lg-6 grid-margin stretch-card">
+                       <div class="card card-rounded">
+                         <div class="card-body">
+                           <div class="d-flex align-items-center justify-content-between mb-3">
+                             <h4 class="card-title card-title-dash">Activities</h4>
+                             <p class="mb-0">20 finished, 5 remaining</p>
+                           </div>
+                           <ul class="bullet-line-list">
+                             <li>
+                               <div class="d-flex justify-content-between">
+                                 <div><span class="text-light-green">Ben Tossell</span> assign you a task</div>
+                                 <p>Just now</p>
+                               </div>
+                             </li>
+                             <li>
+                               <div class="d-flex justify-content-between">
+                                 <div><span class="text-light-green">Oliver Noah</span> assign you a task</div>
+                                 <p>1h</p>
+                               </div>
+                             </li>
+                             <li>
+                               <div class="d-flex justify-content-between">
+                                 <div><span class="text-light-green">Jack William</span> assign you a task</div>
+                                 <p>1h</p>
+                               </div>
+                             </li>
+                             <li>
+                               <div class="d-flex justify-content-between">
+                                 <div><span class="text-light-green">Leo Lucas</span> assign you a task</div>
+                                 <p>1h</p>
+                               </div>
+                             </li>
+                             <li>
+                               <div class="d-flex justify-content-between">
+                                 <div><span class="text-light-green">Thomas Henry</span> assign you a task</div>
+                                 <p>1h</p>
+                               </div>
+                             </li>
+                             <li>
+                               <div class="d-flex justify-content-between">
+                                 <div><span class="text-light-green">Ben Tossell</span> assign you a task</div>
+                                 <p>1h</p>
+                               </div>
+                             </li>
+                             <li>
+                               <div class="d-flex justify-content-between">
+                                 <div><span class="text-light-green">Ben Tossell</span> assign you a task</div>
+                                 <p>1h</p>
+                               </div>
+                             </li>
+                           </ul>
+                           <div class="list align-items-center pt-3">
+                             <div class="wrapper w-100">
+                               <p class="mb-0">
+                                 <a href="#" class="fw-bold text-primary">Show all <i class="mdi mdi-arrow-right ms-2"></i></a>
+                               </p>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+                 <div class="col-lg-4 d-flex flex-column">
+                  
+                   <div class="row flex-grow">
+                     <div class="col-12 grid-margin stretch-card">
+                       <div class="card card-rounded">
+                         <div class="card-body">
+                           <div class="row">
+                             <div class="col-lg-12">
+                               <div class="chartjs-size-monitor">
+                                 <div class="chartjs-size-monitor-expand">
+                                   <div class="">
+
+                                   </div>
+                                  </div>
+                                  <div class="chartjs-size-monitor-shrink"><div class="">
+
+                                  </div>
+                                </div>
+                              </div>
+                               <div class="d-flex justify-content-between align-items-center mb-3">
+                                 <h4 class="card-title card-title-dash">Complaint Count</h4>
+                               </div>
+                               <canvas class="my-auto chartjs-render-monitor" id="doughnutChart" height="205" style="display: block; height: 164px; width: 247px;" width="308"></canvas>
+                               <div id="doughnut-chart-legend" class="mt-5 text-center">
+                                 
+                                </div>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                   <div class="row flex-grow">
+                     <div class="col-12 grid-margin stretch-card">
+                       <div class="card card-rounded">
+                         <div class="card-body">
+                           <div class="row">
+                             <div class="col-lg-12">
+                               <div class="d-flex justify-content-between align-items-center mb-3">
+                                 <div>
+                                   <h4 class="card-title card-title-dash">Report</h4>
+                                 </div>
+                               </div>
+                               <div class="mt-3"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
+                                 <canvas id="leaveReport" style="display: block; height: 150px; width: 246px;" width="307" height="187" class="chartjs-render-monitor"></canvas>
+                               </div>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                  
+                 </div>
+                -->
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+ </div>  
+{% endblock %}
