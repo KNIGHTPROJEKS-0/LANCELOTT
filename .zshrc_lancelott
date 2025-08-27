@@ -1,0 +1,201 @@
+# LANCELOTT-specific zsh configuration
+# Source this file from your main .zshrc for optimal terminal experience
+
+# ═══ LANCELOTT Terminal Fixes ═══════════════════════════════════════════════════
+# Fix VS Code terminal display issues
+if [[ "$TERM_PROGRAM" == "vscode" ]]; then
+    # Fix terminal encoding and display
+    export TERM=xterm-256color
+    export COLORTERM=truecolor
+    export LANG=en_US.UTF-8
+    export LC_ALL=en_US.UTF-8
+
+    # Disable problematic features that can cause blank terminals
+    unset ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE
+    export ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+    export ZSH_DISABLE_COMPFIX=true
+
+    # Optimize for VS Code terminal performance
+    export VSCODE_TERMINAL=1
+    export DISABLE_AUTO_TITLE="true"
+
+    # Fix prompt issues
+    setopt NO_PROMPT_SP
+fi
+
+# ═══ LANCELOTT Project Environment ══════════════════════════════════════════════
+# Auto-detect and configure LANCELOTT environment
+if [[ "$(pwd)" == *"LANCELOTT"* ]] || [[ "$PWD" == *"LANCELOTT"* ]]; then
+    # Set project root
+    export LANCELOTT_PROJECT_ROOT="$(pwd)"
+
+    # Python path configuration
+    export PYTHONPATH="$(pwd):$(pwd)/core:$(pwd)/api:$(pwd)/integrations:$PYTHONPATH"
+
+    # Auto-activate virtual environment
+    if [[ -f "$(pwd)/.venv/bin/activate" ]] && [[ -z "$VIRTUAL_ENV" ]]; then
+        echo "🛡️ Activating LANCELOTT virtual environment..."
+        source "$(pwd)/.venv/bin/activate"
+    fi
+
+    # LANCELOTT environment variables
+    export LANCELOTT_ENV=development
+    export LANCELOTT_PORT=7777
+    export LANCELOTT_HOST=0.0.0.0
+
+    # Display project status
+    echo ""
+    echo "🛡️ LANCELOTT Security Toolkit Ready"
+    echo "📁 Project: $(basename $(pwd))"
+    echo "🐍 Python: $(python --version 2>/dev/null || echo 'Not found')"
+    echo "🌐 Port: $LANCELOTT_PORT"
+    echo ""
+fi
+
+# ═══ LANCELOTT Aliases ══════════════════════════════════════════════════════════
+# Project navigation
+alias lancelott='cd $HOME/KNIGHTPROJEKS/CERBERUS-FANGS/LANCELOTT'
+alias ll-logs='cd $HOME/KNIGHTPROJEKS/CERBERUS-FANGS/LANCELOTT && tail -f logs/*.log 2>/dev/null || echo "No logs found"'
+alias ll-root='cd $HOME/KNIGHTPROJEKS/CERBERUS-FANGS/LANCELOTT'
+
+# Application management
+alias ll-start='python app.py'
+alias ll-dev='make dev'
+alias ll-stop='make stop'
+alias ll-test='make test'
+alias ll-build='make build'
+alias ll-clean='make clean'
+alias ll-install='make install'
+
+# Service status and monitoring
+alias ll-status='curl -s http://localhost:7777/health 2>/dev/null | python -m json.tool || echo "LANCELOTT not running"'
+alias ll-ping='curl -s http://localhost:7777 > /dev/null && echo "✅ LANCELOTT is running" || echo "❌ LANCELOTT is not running"'
+alias ll-ps='ps aux | grep -E "(python|uvicorn|app\.py)" | grep -v grep'
+
+# Development shortcuts
+alias ll-docs='open http://localhost:7777/docs'
+alias ll-redoc='open http://localhost:7777/redoc'
+alias ll-main='open http://localhost:7777'
+alias ll-restart='make stop && sleep 2 && make start'
+
+# Tool-specific shortcuts
+alias ll-nmap='curl -X GET http://localhost:7777/api/v1/tools/nmap/status'
+alias ll-argus='curl -X GET http://localhost:7777/api/v1/tools/argus/status'
+alias ll-tools='curl -X GET http://localhost:7777/api/v1/tools/status'
+
+# Environment management
+alias ll-venv='source .venv/bin/activate'
+alias ll-deps='pip install -r requirements.txt'
+alias ll-freeze='pip freeze > requirements.txt'
+
+# Debugging and troubleshooting
+alias ll-debug='python -c "import sys; print(f\"Python: {sys.executable}\"); import app; print(\"✅ App imports successfully\")"'
+alias ll-config='python -c "from core.config import settings; print(f\"Host: {settings.HOST}, Port: {settings.PORT}\")"'
+alias ll-health='python scripts/utils/verify_project_ready.py'
+
+# ═══ LANCELOTT Functions ════════════════════════════════════════════════════════
+# Quick project setup function
+ll-setup() {
+    echo "🛠️ Setting up LANCELOTT environment..."
+
+    # Go to project directory
+    cd $HOME/KNIGHTPROJEKS/CERBERUS-FANGS/LANCELOTT
+
+    # Create virtual environment if it doesn't exist
+    if [[ ! -d ".venv" ]]; then
+        echo "📦 Creating virtual environment..."
+        python3 -m venv .venv
+    fi
+
+    # Activate virtual environment
+    source .venv/bin/activate
+
+    # Install dependencies
+    echo "📦 Installing dependencies..."
+    pip install -r requirements.txt
+
+    # Set up environment file
+    if [[ ! -f ".env" ]] && [[ -f ".env.example" ]]; then
+        echo "⚙️ Creating environment file..."
+        cp .env.example .env
+    fi
+
+    echo "✅ LANCELOTT setup complete!"
+    echo "🚀 Run 'll-start' to start the application"
+}
+
+# Quick terminal fix function
+ll-fix-terminal() {
+    echo "🔧 Fixing terminal issues..."
+
+    # Reset terminal settings
+    reset
+
+    # Clear problematic environment variables
+    unset ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE
+    export ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+
+    # Fix encoding
+    export LANG=en_US.UTF-8
+    export LC_ALL=en_US.UTF-8
+    export TERM=xterm-256color
+
+    # Reload shell functions
+    autoload -U compinit && compinit
+
+    echo "✅ Terminal fixes applied"
+    echo "💡 Try opening a new terminal or running 'exec zsh'"
+}
+
+# Project information function
+ll-info() {
+    echo "🛡️ LANCELOTT Project Information"
+    echo "================================="
+    echo "📁 Project Root: $LANCELOTT_PROJECT_ROOT"
+    echo "🐍 Python Path: $PYTHONPATH"
+    echo "🌐 Default Port: ${LANCELOTT_PORT:-7777}"
+    echo "📊 Virtual Env: ${VIRTUAL_ENV:-'Not activated'}"
+    echo ""
+    echo "🚀 Quick Commands:"
+    echo "  ll-start    - Start LANCELOTT"
+    echo "  ll-stop     - Stop LANCELOTT"
+    echo "  ll-status   - Check status"
+    echo "  ll-docs     - Open documentation"
+    echo "  ll-setup    - Full project setup"
+    echo ""
+}
+
+# ═══ LANCELOTT Completions ══════════════════════════════════════════════════════
+# Add completion for LANCELOTT commands
+if command -v compinit >/dev/null 2>&1; then
+    # Custom completions for ll-* commands
+    _ll_commands() {
+        local commands=(
+            'start:Start LANCELOTT application'
+            'stop:Stop LANCELOTT application'
+            'status:Check application status'
+            'test:Run tests'
+            'docs:Open documentation'
+            'setup:Setup project environment'
+            'clean:Clean build artifacts'
+            'info:Show project information'
+        )
+        _describe 'LANCELOTT commands' commands
+    }
+
+    compdef _ll_commands ll-start ll-stop ll-status ll-test ll-docs ll-setup ll-clean ll-info
+fi
+
+# ═══ Welcome Message ════════════════════════════════════════════════════════════
+if [[ "$(pwd)" == *"LANCELOTT"* ]] && [[ -z "$LANCELOTT_WELCOME_SHOWN" ]]; then
+    export LANCELOTT_WELCOME_SHOWN=1
+
+    echo ""
+    echo "⚔️  Welcome to LANCELOTT Security Toolkit"
+    echo "🛡️  Unified Penetration Testing Suite"
+    echo ""
+    echo "💡 Quick start: ll-setup && ll-start"
+    echo "📚 Documentation: ll-docs"
+    echo "ℹ️  More info: ll-info"
+    echo ""
+fi

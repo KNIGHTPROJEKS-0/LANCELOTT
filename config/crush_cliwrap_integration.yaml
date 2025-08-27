@@ -1,0 +1,247 @@
+# Crush + CliWrap Integration Configuration
+# Comprehensive configuration for integrated tool orchestration
+
+integration:
+  name: "Crush + CliWrap Orchestration"
+  version: "1.0.0"
+  description: "Integrated file management and command execution framework"
+
+tools:
+  crush:
+    name: "Crush CLI File Manager"
+    path: "tools/crush/crush"
+    binary: "tools/crush/crush"
+    port: 8000
+    role: "orchestrator"
+    capabilities:
+      - file_management
+      - tool_coordination
+      - workflow_execution
+      - terminal_interface
+    config_file: "config/crush.conf"
+
+  cliwrap:
+    name: "CliWrap Command Wrapper"
+    path: "tools/CliWrap"
+    project_file: "tools/CliWrap/CliWrap.csproj"
+    port: 8001
+    role: "executor"
+    capabilities:
+      - command_wrapping
+      - process_management
+      - cross_platform_execution
+      - enhanced_output_handling
+    config_file: "config/cliwrap.conf"
+
+orchestration:
+  default_mode: "enhanced" # enhanced, basic, direct
+
+  execution_modes:
+    enhanced:
+      description: "Crush orchestrates, CliWrap executes commands"
+      primary_tool: "crush"
+      executor: "cliwrap"
+      benefits:
+        - "Enhanced process management"
+        - "Better error handling"
+        - "Cross-platform compatibility"
+        - "Structured output parsing"
+
+    basic:
+      description: "Direct Crush execution without CliWrap"
+      primary_tool: "crush"
+      executor: "direct"
+
+    direct:
+      description: "Direct system command execution"
+      primary_tool: "system"
+      executor: "subprocess"
+
+workflows:
+  # Predefined integrated workflows
+  reconnaissance:
+    name: "Enhanced Reconnaissance"
+    mode: "enhanced"
+    tools:
+      - name: "nmap"
+        executor: "cliwrap"
+        timeout: 300
+      - name: "feroxbuster"
+        executor: "cliwrap"
+        timeout: 600
+      - name: "intel-scan"
+        executor: "cliwrap"
+        timeout: 300
+
+  web_assessment:
+    name: "Web Application Assessment"
+    mode: "enhanced"
+    tools:
+      - name: "argus"
+        executor: "cliwrap"
+        timeout: 600
+      - name: "web-check"
+        executor: "cliwrap"
+        timeout: 300
+
+  osint_investigation:
+    name: "OSINT Investigation"
+    mode: "enhanced"
+    tools:
+      - name: "sherlock"
+        executor: "cliwrap"
+        timeout: 300
+      - name: "social-analyzer"
+        executor: "cliwrap"
+        timeout: 600
+
+security_tools:
+  # Tool definitions with CliWrap integration
+  nmap:
+    command: "nmap"
+    default_args: ["-sV", "-sC"]
+    enhanced_args: ["--script", "vuln"]
+    timeout: 300
+    output_format: "xml"
+    cliwrap_enabled: true
+
+  feroxbuster:
+    command: "feroxbuster"
+    default_args: ["-u"]
+    enhanced_args: ["--depth", "3", "--threads", "50"]
+    timeout: 600
+    output_format: "json"
+    cliwrap_enabled: true
+
+  argus:
+    command: "python3"
+    default_args: ["tools/Argus/argus.py"]
+    enhanced_args: ["--verbose", "--output-json"]
+    timeout: 600
+    output_format: "json"
+    cliwrap_enabled: true
+
+  sherlock:
+    command: "python3"
+    default_args: ["tools/SHERLOCK/sherlock.py"]
+    enhanced_args: ["--timeout", "10"]
+    timeout: 300
+    output_format: "json"
+    cliwrap_enabled: true
+
+  intel-scan:
+    command: "python3"
+    default_args: ["tools/Intel-Scan/intel-scan.py", "-t"]
+    enhanced_args: ["--deep", "--json"]
+    timeout: 300
+    output_format: "json"
+    cliwrap_enabled: true
+
+api:
+  # API endpoint configuration
+  base_url: "http://localhost:7777/api/v1"
+
+  endpoints:
+    crush:
+      base: "/tools/crush"
+      health: "/tools/crush/health"
+      execute: "/tools/crush/execute"
+      orchestrate: "/tools/crush/orchestrate"
+      workflows: "/tools/crush/workflows"
+
+    cliwrap:
+      base: "/tools/cliwrap"
+      health: "/tools/cliwrap/health"
+      wrap: "/tools/cliwrap/wrap"
+      batch: "/tools/cliwrap/batch"
+
+    integration:
+      status: "/integrations/status"
+      health: "/integrations/health"
+
+directories:
+  # Directory structure for integration
+  root: "."
+  tools: "tools"
+  workflows: "workflows"
+  config: "config"
+  logs: "logs"
+  reports: "reports"
+  output: "reports/crush_cliwrap_output"
+
+logging:
+  # Integrated logging configuration
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+  files:
+    crush: "logs/crush_orchestrator.log"
+    cliwrap: "logs/cliwrap_wrapper.log"
+    integration: "logs/crush_cliwrap_integration.log"
+
+  console_output: true
+  file_rotation: true
+  max_file_size: "10MB"
+  backup_count: 5
+
+performance:
+  # Performance optimization settings
+  max_concurrent_tools: 5
+  command_timeout: 600
+  memory_limit: "2GB"
+  temp_cleanup: true
+
+monitoring:
+  # Health monitoring configuration
+  health_check_interval: 30
+  status_endpoint: "/api/v1/integrations/status"
+  metrics_collection: true
+
+dependencies:
+  # Required dependencies
+  system:
+    - name: "go"
+      version: ">=1.19"
+      check_command: "go version"
+    - name: "dotnet"
+      version: ">=6.0"
+      check_command: "dotnet --version"
+    - name: "python3"
+      version: ">=3.8"
+      check_command: "python3 --version"
+
+  python_packages:
+    - "fastapi>=0.104.1"
+    - "pydantic>=2.0.0"
+    - "rich>=13.0.0"
+    - "requests>=2.31.0"
+
+features:
+  # Feature flags
+  enhanced_orchestration: true
+  cliwrap_integration: true
+  workflow_automation: true
+  background_execution: true
+  progress_tracking: true
+  error_recovery: true
+
+security:
+  # Security configuration
+  auth_required: false # Set to true in production
+  api_key_validation: false
+  rate_limiting: false
+  input_sanitization: true
+  command_validation: true
+
+  allowed_commands:
+    - "nmap"
+    - "feroxbuster"
+    - "python3"
+    - "node"
+
+  blocked_commands:
+    - "rm"
+    - "rmdir"
+    - "del"
+    - "format"
+    - "sudo"

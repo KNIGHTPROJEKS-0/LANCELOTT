@@ -1,0 +1,295 @@
+name: 🛡️ LANCELOTT CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_environment:
+        description: "Deployment environment"
+        required: true
+        default: "development"
+        type: choice
+        options:
+          - development
+          - production
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "18"
+  FIREBASE_PROJECT_ID: "lancelott-z9dko"
+
+jobs:
+  # ============================================================================
+  # Code Quality and Testing
+  # ============================================================================
+  test:
+    name: 🧪 Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📦 Cache Python Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: 🔧 Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov black flake8 mypy
+
+      - name: 🎨 Code Formatting Check
+        run: |
+          black --check --diff .
+
+      - name: 🔍 Linting
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: 🔎 Type Checking
+        run: |
+          mypy . --ignore-missing-imports --no-strict-optional
+
+      - name: 🧪 Run Tests
+        run: |
+          pytest tests/ -v --cov=. --cov-report=xml --cov-report=html
+
+      - name: 📊 Upload Coverage Reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+  # ============================================================================
+  # Security Scanning
+  # ============================================================================
+  security:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🛡️ Run Bandit Security Scan
+        uses: securecodewarrior/github-action-bandit@v1.0.1
+        with:
+          scan_path: "."
+
+      - name: 🔍 Run Safety Check
+        run: |
+          pip install safety
+          safety check --json --output safety-report.json || true
+
+      - name: 📋 SARIF Security Report
+        uses: github/super-linter@v4
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_PYTHON_BLACK: false
+          VALIDATE_PYTHON_PYLINT: false
+          VALIDATE_PYTHON_FLAKE8: false
+
+  # ============================================================================
+  # Build Application
+  # ============================================================================
+  build:
+    name: 🏗️ Build Application
+    runs-on: ubuntu-latest
+    needs: [test, security]
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 🟢 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 📦 Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r functions/requirements.txt
+
+      - name: 📦 Install Node.js Dependencies
+        run: |
+          npm install -g firebase-tools
+
+      - name: 🏗️ Build Frontend Assets
+        run: |
+          # Ensure dist directory exists
+          mkdir -p dist
+
+          # Copy static files
+          cp -r static/* dist/ 2>/dev/null || true
+
+          # Verify dashboard file exists
+          ls -la dist/
+
+      - name: 🧪 Validate Firebase Configuration
+        run: |
+          firebase --version
+          firebase projects:list --token "${{ secrets.FIREBASE_TOKEN }}" || echo "Token validation failed"
+
+      - name: 📦 Create Build Artifacts
+        run: |
+          tar -czf lancelott-build.tar.gz \
+            --exclude='.git' \
+            --exclude='__pycache__' \
+            --exclude='.pytest_cache' \
+            --exclude='.venv' \
+            --exclude='node_modules' \
+            .
+
+      - name: 📤 Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: lancelott-build
+          path: lancelott-build.tar.gz
+          retention-days: 30
+
+  # ============================================================================
+  # Deploy to Firebase
+  # ============================================================================
+  deploy:
+    name: 🚀 Deploy to Firebase
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+    environment:
+      name: ${{ github.event.inputs.deploy_environment || 'development' }}
+      url: https://lancelott-z9dko.web.app
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: lancelott-build
+
+      - name: 📂 Extract Build
+        run: |
+          tar -xzf lancelott-build.tar.gz
+          ls -la
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 🟢 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 📦 Install Firebase CLI
+        run: |
+          npm install -g firebase-tools
+          firebase --version
+
+      - name: 🔑 Configure Firebase Authentication
+        run: |
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" > service-account.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/service-account.json"
+
+      - name: 🏗️ Prepare Functions
+        run: |
+          # Ensure functions directory structure
+          mkdir -p functions
+
+          # Install function dependencies
+          cd functions
+          pip install -r requirements.txt -t .
+          cd ..
+
+      - name: 🚀 Deploy to Firebase
+        run: |
+          firebase use ${{ env.FIREBASE_PROJECT_ID }} --token "${{ secrets.FIREBASE_TOKEN }}"
+
+          # Deploy Firestore rules and indexes
+          firebase deploy --only firestore:rules --token "${{ secrets.FIREBASE_TOKEN }}"
+          firebase deploy --only firestore:indexes --token "${{ secrets.FIREBASE_TOKEN }}"
+
+          # Deploy Storage rules
+          firebase deploy --only storage --token "${{ secrets.FIREBASE_TOKEN }}"
+
+          # Deploy Functions
+          firebase deploy --only functions --token "${{ secrets.FIREBASE_TOKEN }}"
+
+          # Deploy Hosting
+          firebase deploy --only hosting --token "${{ secrets.FIREBASE_TOKEN }}"
+
+      - name: 🧪 Post-Deployment Tests
+        run: |
+          # Wait for deployment to propagate
+          sleep 30
+
+          # Test API health endpoint
+          curl -f https://lancelott-z9dko.web.app/api/health || exit 1
+
+          # Test Firebase Functions
+          curl -f https://us-central1-lancelott-z9dko.cloudfunctions.net/health_check || exit 1
+
+      - name: 📝 Deployment Summary
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Status | URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|---------|-----|" >> $GITHUB_STEP_SUMMARY
+          echo "| Hosting | ✅ Deployed | https://lancelott-z9dko.web.app |" >> $GITHUB_STEP_SUMMARY
+          echo "| Functions | ✅ Deployed | https://us-central1-lancelott-z9dko.cloudfunctions.net |" >> $GITHUB_STEP_SUMMARY
+          echo "| Firestore | ✅ Updated | Rules and indexes deployed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Storage | ✅ Updated | Security rules deployed |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎯 Quick Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [Dashboard](https://lancelott-z9dko.web.app)" >> $GITHUB_STEP_SUMMARY
+          echo "- [API Health](https://lancelott-z9dko.web.app/api/health)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Firebase Console](https://console.firebase.google.com/project/lancelott-z9dko)" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================================================
+  # Notification
+  # ============================================================================
+  notify:
+    name: 📢 Notification
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: always()
+
+    steps:
+      - name: 📢 Deployment Notification
+        if: success()
+        run: |
+          echo "🎉 LANCELOTT successfully deployed to Firebase!"
+          echo "🌐 Live at: https://lancelott-z9dko.web.app"
+
+      - name: 🚨 Failure Notification
+        if: failure()
+        run: |
+          echo "❌ LANCELOTT deployment failed!"
+          echo "📝 Check the logs for details."

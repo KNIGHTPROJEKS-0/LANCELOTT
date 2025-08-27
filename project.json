@@ -1,0 +1,100 @@
+{
+  "name": "LANCELOTT",
+  "version": "2.1.0",
+  "description": "Unified Security Tools API - Professional Penetration Testing Suite",
+  "author": "ORDEROFCODE",
+  "license": "MIT",
+  "keywords": [
+    "security",
+    "penetration-testing",
+    "cybersecurity",
+    "api",
+    "fastapi",
+    "python",
+    "tools",
+    "automation",
+    "ai-enhanced"
+  ],
+  "architecture": {
+    "framework": "FastAPI",
+    "languages": ["Python", "Go", "Node.js", "TypeScript", "Rust", "C++"],
+    "databases": ["SQLite", "PostgreSQL"],
+    "caching": ["Redis"],
+    "containerization": ["Docker", "Docker Compose"],
+    "ai_integration": ["LangChain", "OpenAI", "Anthropic"],
+    "workflow_automation": ["n8n"],
+    "orchestration": ["Crush CLI"]
+  },
+  "components": {
+    "security_tools": {
+      "count": 25,
+      "categories": [
+        "Network Reconnaissance",
+        "Web Application Testing",
+        "OSINT & Intelligence",
+        "Penetration Testing",
+        "AI Integration",
+        "Obfuscation & Evasion"
+      ]
+    },
+    "integrations": {
+      "ai_frameworks": ["LangChain Python", "LangChain.js"],
+      "protocols": ["MCP", "HTTP", "WebSocket"],
+      "apis": "120+ endpoints",
+      "authentication": "JWT-based"
+    }
+  },
+  "directories": {
+    "api": "FastAPI routes and endpoints",
+    "core": "Core framework functionality",
+    "tools": "Security tools (25+ tools)",
+    "integrations": "Tool integration wrappers",
+    "config": "Configuration management",
+    "tests": "Comprehensive test suite",
+    "docs": "Documentation and guides",
+    "workflows": "N8N workflow automation",
+    "build": "Build and deployment scripts",
+    "status": "Monitoring and status tracking"
+  },
+  "features": {
+    "unified_api": "Single API for all security tools",
+    "ai_enhanced": "AI-powered security analysis",
+    "real_time_monitoring": "Comprehensive status tracking",
+    "workflow_automation": "N8N integration for workflows",
+    "multi_language": "Support for 6+ programming languages",
+    "containerized": "Full Docker support",
+    "crush_orchestration": "Crush CLI as main orchestrator",
+    "cross_platform": "Linux, macOS, Windows support"
+  },
+  "requirements": {
+    "python": ">=3.8",
+    "node": ">=16.0",
+    "go": ">=1.19",
+    "docker": ">=20.0",
+    "memory": ">=4GB RAM",
+    "storage": ">=10GB disk space"
+  },
+  "ports": {
+    "main_api": 7777,
+    "n8n": 5678,
+    "supergateway": 3000,
+    "supercompat": 3001,
+    "langchain": 8100,
+    "langchainjs": 8101,
+    "crush": 8000,
+    "cliwrap": 8001
+  },
+  "quick_start": ["make install", "make setup", "make start"],
+  "documentation": {
+    "readme": "README.md",
+    "api_docs": "http://localhost:7777/docs",
+    "project_status": "PROJECT_STATUS.md",
+    "integration_summary": "LANGCHAIN_INTEGRATION_SUMMARY.md"
+  },
+  "repository": {
+    "structure": "monorepo",
+    "tools_included": true,
+    "dependencies_managed": true,
+    "docker_ready": true
+  }
+}

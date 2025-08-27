@@ -1,0 +1,184 @@
+# Docker Compose for LANCELOTT
+version: "3.8"
+
+services:
+  # Main LANCELOTT Application
+  lancelott:
+    build: .
+    container_name: lancelott
+    ports:
+      # Main FastAPI application
+      - "7777:7777"
+      # Tool-specific ports for standalone services
+      - "8080:8080" # Argus
+      - "8081:8081" # Kraken
+      - "8082:8082" # Metabigor
+      - "8083:8083" # Dismap
+      - "8084:8084" # Osmedeus
+      - "8085:8085" # SpiderFoot
+      - "8086:8086" # Social-Analyzer
+      - "8087:8087" # Storm-Breaker
+      - "8088:8088" # PhoneSploit Pro
+      - "8089:8089" # RedTeam-ToolKit
+      - "8090:8090" # Webstor
+      - "8091:8091" # THC-Hydra
+    environment:
+      - PYTHONPATH=/app
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./lancelott.db}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - ALLOWED_ORIGINS=http://localhost:7777,http://127.0.0.1:7777
+    volumes:
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+      - ./uploads:/app/uploads
+      - ./configs:/app/configs
+      # Tool-specific volumes
+      - ./Argus/reports:/app/Argus/reports
+      - ./Kraken/logs:/app/Kraken/logs
+      - ./Social-Analyzer/logs:/app/Social-Analyzer/logs
+      - ./Spiderfoot/logs:/app/Spiderfoot/logs
+      - ./Storm-Breaker/logs:/app/Storm-Breaker/logs
+      - ./RedTeam-ToolKit/media:/app/RedTeam-ToolKit/media
+      - ./Osmedeus/workspaces:/app/Osmedeus/workspaces
+      - ./Metabigor/output:/app/Metabigor/output
+      - ./dismap/output:/app/dismap/output
+    depends_on:
+      - redis
+      - postgres
+      - supergateway
+      - supercompat
+      - n8n
+    networks:
+      - lancelott-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7777/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: lancelott-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - cerberus-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # PostgreSQL for persistent data storage
+  postgres:
+    image: postgres:15-alpine
+    container_name: lancelott-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-lancelott}
+      - POSTGRES_USER=${POSTGRES_USER:-lancelott}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-lancelott_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - lancelott-network
+    restart: unless-stopped
+
+  # SuperGateway MCP Protocol Gateway
+  supergateway:
+    build:
+      context: ./integrations/ai/supergateway
+      dockerfile: Dockerfile
+    container_name: lancelott-supergateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    networks:
+      - lancelott-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # SuperCompat AI Compatibility Layer
+  supercompat:
+    build:
+      context: ./integrations/ai/supercompat
+      dockerfile: Dockerfile
+    container_name: lancelott-supercompat
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    networks:
+      - lancelott-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # n8n Workflow Automation
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: lancelott-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD:-lancelott}
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - lancelott-network
+    restart: unless-stopped
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: cerberus-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - lancelott
+    networks:
+      - lancelott-network
+    restart: unless-stopped
+    profiles:
+      - production
+
+volumes:
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+  n8n_data:
+    driver: local
+
+networks:
+  cerberus-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

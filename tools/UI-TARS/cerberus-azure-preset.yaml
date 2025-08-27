@@ -1,0 +1,31 @@
+# CERBERUS Azure OpenAI Alternative Preset
+# Using Azure OpenAI as a fallback option (experimental)
+# Note: UI-TARS works best with UI-TARS-1.5 model, this is for testing compatibility
+
+# Language Setting
+language: en
+
+# VLM Configuration - Azure OpenAI GPT-4 Vision (as alternative to UI-TARS model)
+vlmProvider: azure
+vlmBaseUrl: https://gujil-mensn3og-eastus2.openai.azure.com/openai/deployments/GPT-5-CERBERUS/chat/completions?api-version=2025-01-01-preview
+vlmApiKey: 5c1Yf4Wjer5DDsltfNgtK4xfrhCnA33katu9fnhScnGlLFyQgJTZJQQJ99BHACHYHv6XJ3w3AAAAACOGOeiK
+vlmModelName: gpt-5-chat
+
+# Response API Support (Azure OpenAI supports this)
+useResponsesApi: true
+
+# Operator Configuration
+operator: Local Computer Operator
+
+# Performance Settings (slightly more conservative for Azure)
+screenshotScale: 0.8
+maxLoopCount: 30
+loopIntervalInMs: 3000
+
+# Browser Settings
+searchEngineForBrowser: google
+
+# Azure-specific optimizations
+enableVisionCapabilities: true
+maxTokens: 4096
+temperature: 0.1

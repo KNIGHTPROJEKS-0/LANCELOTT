@@ -1,0 +1,476 @@
+# CERBERUS-FANGS LANCELOTT - Configuration Template
+# This file contains all configuration options for the LANCELOTT framework
+
+# API Configuration
+api:
+  host: "0.0.0.0"
+  port: 7777
+  debug: false
+  workers: 4
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://localhost:5678"
+    - "http://127.0.0.1:3000"
+  auth_enabled: true
+  rate_limiting: true
+  ssl_cert: null
+  ssl_key: null
+
+# Database Configuration
+database:
+  type: "sqlite" # Options: sqlite, postgresql, mysql
+  host: "localhost"
+  port: 5432
+  database: "lancelott"
+  username: "lancelott_user"
+  password: "lancelott_pass"
+  url: null
+
+# Security Configuration
+security:
+  jwt_secret: "your-secret-key-change-in-production"
+  jwt_expiration: 3600 # seconds
+  api_key_length: 32
+  password_min_length: 8
+  max_login_attempts: 5
+  lockout_duration: 300 # seconds
+
+# Integration Configuration
+integrations:
+  n8n_url: "http://localhost:5678"
+  n8n_auth_user: "admin"
+  n8n_auth_password: "lancelott"
+  supergateway_url: "http://localhost:3000"
+  supercompat_url: "http://localhost:3001"
+  webhook_base_url: "http://localhost:7777/webhooks"
+  # AI Integration settings
+  mcp_enabled: true
+  ai_compatibility_enabled: true
+  vanguard_obfuscation_enabled: true
+
+# Logging Configuration
+logging:
+  level: "INFO" # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_path: "logs/lancelott.log"
+  max_file_size: 10 # MB
+  backup_count: 5
+  console_output: true
+
+# Monitoring Configuration
+monitoring:
+  enabled: true
+  check_interval: 30 # seconds
+  timeout: 10 # seconds
+  retry_attempts: 3
+  alert_email: null
+  alert_webhook: null
+
+# Tool Configurations
+tools:
+  # Go-based tools
+  metabigor:
+    name: "Metabigor"
+    executable_path: "tools/Metabigor/metabigor"
+    wrapper_module: "integrations.tools.metabigor_wrapper"
+    port: 7004
+    dependencies: ["go"]
+    enabled: true
+    optional: false
+    build_type: "go"
+    build_command: ["go", "build", "-o", "metabigor", "."]
+    environment_vars: null
+
+  osmedeus:
+    name: "Osmedeus"
+    executable_path: "tools/Osmedeus/osmedeus"
+    wrapper_module: "integrations.tools.osmedeus_wrapper"
+    port: 7005
+    dependencies: ["go"]
+    enabled: true
+    optional: false
+    build_type: "go"
+    build_command: ["go", "build", "-o", "osmedeus", "."]
+    environment_vars: null
+
+  dismap:
+    name: "Dismap"
+    executable_path: "tools/dismap/dismap"
+    wrapper_module: "integrations.tools.dismap_wrapper"
+    port: 7011
+    dependencies: ["go"]
+    enabled: true
+    optional: false
+    build_type: "go"
+    build_command: ["go", "build", "-o", "dismap", "."]
+    environment_vars: null
+
+  # Python-based tools
+  argus:
+    name: "Argus"
+    executable_path: "tools/Argus/argus.py"
+    wrapper_module: "integrations.tools.argus_wrapper"
+    port: 7002
+    dependencies: ["python3", "pip"]
+    enabled: true
+    optional: false
+    build_type: "python"
+    build_command: ["pip", "install", "-r", "requirements.txt"]
+    environment_vars: null
+
+  kraken:
+    name: "Kraken"
+    executable_path: "tools/Kraken/kraken.py"
+    wrapper_module: "integrations.tools.kraken_wrapper"
+    port: 7003
+    dependencies: ["python3", "pip"]
+    enabled: true
+    optional: false
+    build_type: "python"
+    build_command: ["pip", "install", "-r", "requirements.txt"]
+    environment_vars: null
+
+  spiderfoot:
+    name: "SpiderFoot"
+    executable_path: "tools/Spiderfoot/sf.py"
+    wrapper_module: "integrations.tools.spiderfoot_wrapper"
+    port: 7006
+    dependencies: ["python3", "pip"]
+    enabled: true
+    optional: false
+    build_type: "python"
+    build_command: ["pip", "install", "-r", "requirements.txt"]
+    environment_vars: null
+
+  social_analyzer:
+    name: "Social-Analyzer"
+    executable_path: "tools/Social-Analyzer/app.py"
+    wrapper_module: "integrations.tools.social_analyzer_wrapper"
+    port: 7007
+    dependencies: ["python3", "pip"]
+    enabled: true
+    optional: false
+    build_type: "python"
+    build_command: ["pip", "install", "-r", "requirements.txt"]
+    environment_vars: null
+
+  phonesploit:
+    name: "PhoneSploit-Pro"
+    executable_path: "tools/PhoneSploit-Pro/phonesploitpro.py"
+    wrapper_module: "integrations.tools.phonesploit_wrapper"
+    port: 7008
+    dependencies: ["python3", "pip"]
+    enabled: false # Optional tool
+    optional: true
+    build_type: "python"
+    build_command: ["pip", "install", "-r", "requirements.txt"]
+    environment_vars: null
+
+  vajra:
+    name: "Vajra"
+    executable_path: "tools/Vajra/vajra.py"
+    wrapper_module: "integrations.tools.vajra_wrapper"
+    port: 7009
+    dependencies: ["python3", "pip"]
+    enabled: true
+    optional: false
+    build_type: "python"
+    build_command: ["pip", "install", "-r", "requirements.txt"]
+    environment_vars: null
+
+  storm_breaker:
+    name: "Storm-Breaker"
+    executable_path: "tools/Storm-Breaker/st.py"
+    wrapper_module: "integrations.tools.storm_breaker_wrapper"
+    port: 7010
+    dependencies: ["python3", "pip"]
+    enabled: false # Optional tool
+    optional: true
+    build_type: "python"
+    build_command: ["pip", "install", "-r", "requirements.txt"]
+    environment_vars: null
+
+  webstor:
+    name: "Webstor"
+    executable_path: "tools/Webstor/webstor.py"
+    wrapper_module: "integrations.tools.webstor_wrapper"
+    port: 7013
+    dependencies: ["python3", "pip"]
+    enabled: false # Optional tool
+    optional: true
+    build_type: "python"
+    build_command: ["pip", "install", "-r", "requirements.txt"]
+    environment_vars: null
+
+  sherlock:
+    name: "SHERLOCK"
+    executable_path: "tools/SHERLOCK/sherlock_project/sherlock.py"
+    wrapper_module: "integrations.tools.sherlock_wrapper"
+    port: 7014
+    dependencies: ["python3", "pip"]
+    enabled: true
+    optional: false
+    build_type: "python"
+    build_command: ["pip", "install", "-r", "requirements.txt"]
+    environment_vars: null
+
+  redteam_toolkit:
+    name: "RedTeam-ToolKit"
+    executable_path: "tools/RedTeam-ToolKit/manage.py"
+    wrapper_module: "integrations.tools.redteam_toolkit_wrapper"
+    port: 7015
+    dependencies: ["python3", "pip"]
+    enabled: true
+    optional: false
+    build_type: "python"
+    build_command: ["pip", "install", "-r", "requirements.txt"]
+    environment_vars: null
+
+  # Node.js/TypeScript tools
+  ui_tars:
+    name: "UI-TARS"
+    executable_path: "tools/UI-TARS/apps/ui-tars/src/main/main.ts"
+    wrapper_module: "integrations.tools.ui_tars_wrapper"
+    port: 7016
+    dependencies: ["node", "npm"]
+    enabled: false # Optional tool
+    optional: true
+    build_type: "node"
+    build_command: ["npm", "install", "&&", "npm", "run", "build"]
+    environment_vars: null
+
+  web_check:
+    name: "Web-Check"
+    executable_path: "tools/Web-Check/server.js"
+    wrapper_module: "integrations.tools.web_check_wrapper"
+    port: 7017
+    dependencies: ["node", "npm"]
+    enabled: false # Optional tool
+    optional: true
+    build_type: "node"
+    build_command: ["npm", "install", "&&", "npm", "run", "build"]
+    environment_vars: null
+
+  # C-based tools
+  thc_hydra:
+    name: "THC-Hydra"
+    executable_path: "tools/THC-Hydra/hydra"
+    wrapper_module: "integrations.tools.hydra_wrapper"
+    port: 7012
+    dependencies: ["gcc", "make"]
+    enabled: true
+    optional: false
+    build_type: "shell"
+    build_command: ["./configure", "&&", "make"]
+    environment_vars: null
+
+  # Core tools (outside tools directory)
+  nmap:
+    name: "Nmap"
+    executable_path: "nmap/nmap"
+    wrapper_module: "integrations.tools.nmap_wrapper"
+    port: 7001
+    dependencies: ["gcc", "make"]
+    enabled: false # Optional tool
+    optional: true
+    build_type: "shell"
+    build_command: ["./configure", "&&", "make"]
+    environment_vars: null
+
+  # New integrated tools
+  redeye:
+    name: "RedEye"
+    executable_path: "tools/RedEye/"
+    wrapper_module: "integrations.tools.redeye_wrapper"
+    port: 7018
+    dependencies: ["node", "npm"]
+    enabled: false # Optional tool
+    optional: true
+    build_type: "node"
+    build_command: ["npm", "install", "&&", "npm", "run", "build"]
+    environment_vars: null
+
+  mhddos:
+    name: "MHDDoS"
+    executable_path: "tools/MHDDoS/start.py"
+    wrapper_module: "integrations.tools.mhddos_wrapper"
+    port: 7019
+    dependencies: ["python3", "pip"]
+    enabled: false # Optional tool - stress testing
+    optional: true
+    build_type: "python"
+    build_command: ["pip", "install", "-r", "requirements.txt"]
+    environment_vars: null
+
+  intel_scan:
+    name: "Intel-Scan"
+    executable_path: "tools/Intel-Scan/intelscan_cli.py"
+    wrapper_module: "integrations.tools.intelscan_wrapper"
+    port: 7020
+    dependencies: ["python3", "pip"]
+    enabled: true
+    optional: false
+    build_type: "python"
+    build_command: ["pip", "install", "-r", "requirements.txt"]
+    environment_vars: null
+
+  feroxbuster:
+    name: "Feroxbuster"
+    executable_path: "tools/feroxbuster/target/release/feroxbuster"
+    wrapper_module: "integrations.tools.feroxbuster_wrapper"
+    port: 7021
+    dependencies: ["cargo", "rust"]
+    enabled: false # Optional tool - requires Rust
+    optional: true
+    build_type: "shell"
+    build_command: ["cargo", "build", "--release"]
+    environment_vars: null
+
+  enhanced_nmap:
+    name: "Enhanced-Nmap"
+    executable_path: "tools/nmap/nmap"
+    wrapper_module: "integrations.tools.enhanced_nmap_wrapper"
+    port: 7022
+    dependencies: ["gcc", "make", "libssl-dev", "libpcap-dev"]
+    enabled: true
+    optional: false
+    build_type: "shell"
+    build_command: ["./configure", "&&", "make"]
+    environment_vars: null
+
+  # Tool orchestrators and utilities
+  crush:
+    name: "Crush"
+    executable_path: "tools/crush/crush"
+    wrapper_module: "integrations.tools.crush_wrapper"
+    port: 8000
+    dependencies: ["go"]
+    enabled: true
+    optional: false
+    build_type: "go"
+    build_command: ["go", "build", "-o", "crush", "."]
+    environment_vars: null
+    orchestrator: true
+
+  cliwrap:
+    name: "CliWrap"
+    executable_path: "tools/CliWrap/"
+    wrapper_module: "integrations.tools.cliwrap_wrapper"
+    port: 8001
+    dependencies: ["dotnet"]
+    enabled: true
+    optional: true
+    build_type: "shell"
+    build_command: ["dotnet", "build"]
+    environment_vars: null
+
+  # AI Framework integrations
+  langchain:
+    name: "LangChain"
+    executable_path: "integrations/frameworks/langchain"
+    wrapper_module: "integrations.frameworks.langchain_wrapper"
+    port: 8100
+    dependencies: ["python3", "pip"]
+    enabled: true
+    optional: false
+    build_type: "python"
+    build_command:
+      ["pip", "install", "langchain", "langchain-core", "langchain-community"]
+    environment_vars:
+      - "OPENAI_API_KEY"
+      - "ANTHROPIC_API_KEY"
+    category: "AI Framework"
+
+  langchainjs:
+    name: "LangChain.js"
+    executable_path: "integrations/frameworks/langchainjs"
+    wrapper_module: "integrations.frameworks.langchainjs_wrapper"
+    port: 8101
+    dependencies: ["node", "npm"]
+    enabled: true
+    optional: false
+    build_type: "node"
+    build_command: ["npm", "install"]
+    environment_vars:
+      - "OPENAI_API_KEY"
+      - "ANTHROPIC_API_KEY"
+    category: "AI Framework"
+
+# Vanguard Obfuscation Tools
+vanguard_tools:
+  pyarmor:
+    name: "PyArmor"
+    executable_path: "tools/security/vanguard/pyarmor/pyarmor.py"
+    tool_type: "python_obfuscation"
+    protection_level: "high"
+    enabled: true
+    optional: false
+
+  javascript_obfuscator:
+    name: "JavaScript Obfuscator"
+    executable_path: "tools/security/vanguard/javascript-obfuscator/index.cli.ts"
+    tool_type: "javascript_obfuscation"
+    protection_level: "high"
+    enabled: true
+    optional: false
+    build_required: true
+
+  skidfuscator:
+    name: "Skidfuscator"
+    executable_path: "tools/security/vanguard/skidfuscator-java-obfuscator/"
+    tool_type: "java_obfuscation"
+    protection_level: "high"
+    enabled: true
+    optional: true
+    build_required: true
+
+  boaz:
+    name: "BOAZ"
+    executable_path: "tools/security/vanguard/BOAZ/Boaz.py"
+    tool_type: "shellcode_obfuscation"
+    protection_level: "very_high"
+    enabled: true
+    optional: false
+
+  hyperion:
+    name: "Hyperion"
+    executable_path: "tools/security/vanguard/Hyperion/hyperion.py"
+    tool_type: "binary_obfuscation"
+    protection_level: "high"
+    enabled: true
+    optional: false
+
+  utls:
+    name: "uTLS"
+    executable_path: "tools/security/vanguard/utls/"
+    tool_type: "network_obfuscation"
+    protection_level: "high"
+    enabled: true
+    optional: true
+    build_required: true
+
+  fake_http:
+    name: "FakeHTTP"
+    executable_path: "tools/security/vanguard/FakeHTTP/"
+    tool_type: "network_obfuscation"
+    protection_level: "medium"
+    enabled: true
+    optional: true
+    build_required: true
+
+  de4py:
+    name: "de4py"
+    executable_path: "tools/security/vanguard/de4py/main.py"
+    tool_type: "python_deobfuscation"
+    protection_level: "medium"
+    enabled: true
+    optional: false
+
+  bitmono:
+    name: "BitMono"
+    executable_path: "tools/security/vanguard/BitMono/"
+    tool_type: "dotnet_obfuscation"
+    protection_level: "medium"
+    enabled: true
+    optional: true
+    build_required: true

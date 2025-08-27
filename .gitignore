@@ -110,6 +110,14 @@ secrets.json
 *.p12
 *.pfx
 
+# Firebase
+*firebase-adminsdk*.json
+firebase-debug.log
+.firebase/
+.firebaserc
+config/firebase/*.json
+!config/firebase/README.md
+
 # Tool-specific ignores
 # Argus
 Argus/reports/

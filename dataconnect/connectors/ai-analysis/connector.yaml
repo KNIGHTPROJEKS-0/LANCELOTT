@@ -1,0 +1,349 @@
+# AI Analysis Connector Configuration
+# Manages AI-powered security analysis, threat intelligence, and automated insights
+
+connector: ai-analysis
+
+# Queries for AI analysis and intelligence operations
+queries:
+  # Get AI analysis results for a scan
+  getAiAnalysisForScan:
+    query: |
+      SELECT a.*,
+             s.tool_name, s.target, s.scan_type,
+             u.email as analyst_email
+      FROM ai_analysis a
+      JOIN scans s ON a.scan_id = s.scan_id
+      JOIN users u ON a.user_id = u.user_id
+      WHERE a.scan_id = @scanId
+      ORDER BY a.created_at DESC
+    variables:
+      scanId: UUID!
+    response: AiAnalysisWithContext[]
+
+  # Get AI analysis by type
+  getAiAnalysisByType:
+    query: |
+      SELECT a.*, s.target, s.tool_name
+      FROM ai_analysis a
+      LEFT JOIN scans s ON a.scan_id = s.scan_id
+      WHERE a.user_id = @userId
+        AND a.analysis_type = @analysisType
+        AND a.created_at >= @startDate
+      ORDER BY a.created_at DESC
+      LIMIT @limit
+    variables:
+      userId: UUID!
+      analysisType: AiAnalysisType!
+      startDate: Timestamp!
+      limit: Int = 50
+    response: AiAnalysisResult[]
+
+  # Get AI cost analytics
+  getAiCostAnalytics:
+    query: |
+      SELECT
+        DATE_TRUNC('day', created_at) as analysis_date,
+        ai_provider,
+        model,
+        analysis_type,
+        COUNT(*) as analysis_count,
+        SUM(tokens_used) as total_tokens,
+        SUM(estimated_cost) as total_cost,
+        AVG(processing_time_ms) as avg_processing_time,
+        AVG(confidence_score) as avg_confidence
+      FROM ai_analysis
+      WHERE user_id = @userId
+        AND created_at >= @startDate
+        AND created_at <= @endDate
+      GROUP BY DATE_TRUNC('day', created_at), ai_provider, model, analysis_type
+      ORDER BY analysis_date DESC, total_cost DESC
+    variables:
+      userId: UUID!
+      startDate: Timestamp!
+      endDate: Timestamp!
+    response: AiCostAnalytics[]
+
+  # Get threat intelligence insights
+  getThreatIntelligenceInsights:
+    query: |
+      SELECT
+        a.analysis_output->>'threat_category' as threat_category,
+        a.analysis_output->>'threat_level' as threat_level,
+        COUNT(*) as occurrence_count,
+        AVG(a.confidence_score) as avg_confidence,
+        STRING_AGG(DISTINCT s.target, ', ') as affected_targets,
+        MAX(a.created_at) as latest_analysis
+      FROM ai_analysis a
+      JOIN scans s ON a.scan_id = s.scan_id
+      WHERE a.user_id = @userId
+        AND a.analysis_type = 'THREAT_INTELLIGENCE'
+        AND a.created_at >= @startDate
+        AND a.analysis_output->>'threat_category' IS NOT NULL
+      GROUP BY a.analysis_output->>'threat_category', a.analysis_output->>'threat_level'
+      ORDER BY occurrence_count DESC, avg_confidence DESC
+    variables:
+      userId: UUID!
+      startDate: Timestamp!
+    response: ThreatIntelligenceInsight[]
+
+  # Get vulnerability risk assessment
+  getVulnerabilityRiskAssessment:
+    query: |
+      SELECT
+        v.vulnerability_id,
+        v.cve_id,
+        v.title,
+        v.severity,
+        v.cvss_score,
+        a.analysis_output->>'risk_score' as ai_risk_score,
+        a.analysis_output->>'attack_probability' as attack_probability,
+        a.analysis_output->>'business_impact' as business_impact,
+        a.analysis_output->>'recommended_priority' as recommended_priority,
+        a.confidence_score,
+        a.created_at as analysis_date
+      FROM vulnerabilities v
+      JOIN ai_analysis a ON a.analysis_output->>'vulnerability_id' = v.vulnerability_id::text
+      JOIN scans s ON v.scan_id = s.scan_id
+      WHERE s.user_id = @userId
+        AND a.analysis_type = 'VULNERABILITY_ASSESSMENT'
+        AND a.created_at >= @startDate
+      ORDER BY
+        (a.analysis_output->>'risk_score')::float DESC,
+        v.cvss_score DESC
+    variables:
+      userId: UUID!
+      startDate: Timestamp!
+    response: VulnerabilityRiskAssessment[]
+
+  # Get AI model performance metrics
+  getAiModelPerformance:
+    query: |
+      SELECT
+        ai_provider,
+        model,
+        analysis_type,
+        COUNT(*) as total_analyses,
+        AVG(confidence_score) as avg_confidence,
+        AVG(processing_time_ms) as avg_processing_time,
+        AVG(tokens_used) as avg_tokens_used,
+        SUM(estimated_cost) as total_cost,
+        MIN(created_at) as first_used,
+        MAX(created_at) as last_used
+      FROM ai_analysis
+      WHERE user_id = @userId
+        AND created_at >= @startDate
+      GROUP BY ai_provider, model, analysis_type
+      ORDER BY total_analyses DESC, avg_confidence DESC
+    variables:
+      userId: UUID!
+      startDate: Timestamp!
+    response: AiModelPerformance[]
+
+# Mutations for AI analysis operations
+mutations:
+  # Create AI analysis request
+  createAiAnalysis:
+    query: |
+      INSERT INTO ai_analysis (
+        analysis_id, scan_id, user_id, analysis_type, provider,
+        model, input_data, created_at
+      ) VALUES (
+        gen_random_uuid(), @scanId, @userId, @analysisType, @provider,
+        @model, @inputData, NOW()
+      )
+      RETURNING *
+    variables:
+      scanId: UUID
+      userId: UUID!
+      analysisType: AiAnalysisType!
+      provider: String!
+      model: String!
+      inputData: JSON!
+    response: AiAnalysis
+
+  # Complete AI analysis with results
+  completeAiAnalysis:
+    query: |
+      UPDATE ai_analysis
+      SET analysis_output = @output,
+          confidence_score = @confidence,
+          tokens_used = @tokensUsed,
+          processing_time_ms = @processingTime,
+          estimated_cost = @cost,
+          completed_at = NOW()
+      WHERE analysis_id = @analysisId
+      RETURNING *
+    variables:
+      analysisId: UUID!
+      output: JSON!
+      confidence: Float
+      tokensUsed: Int
+      processingTime: Int
+      cost: Float
+    response: AiAnalysis
+
+  # Create automated threat assessment
+  createThreatAssessment:
+    query: |
+      WITH vulnerability_data AS (
+        SELECT
+          s.scan_id,
+          s.target,
+          json_agg(
+            json_build_object(
+              'vulnerability_id', v.vulnerability_id,
+              'cve_id', v.cve_id,
+              'title', v.title,
+              'severity', v.severity,
+              'cvss_score', v.cvss_score,
+              'description', v.description
+            )
+          ) as vulnerabilities
+        FROM scans s
+        LEFT JOIN vulnerabilities v ON s.scan_id = v.scan_id
+        WHERE s.scan_id = @scanId
+        GROUP BY s.scan_id, s.target
+      )
+      INSERT INTO ai_analysis (
+        analysis_id, scan_id, user_id, analysis_type, provider,
+        model, input_data, created_at
+      )
+      SELECT
+        gen_random_uuid(), vd.scan_id, @userId, 'THREAT_INTELLIGENCE', @provider,
+        @model, json_build_object('target', vd.target, 'vulnerabilities', vd.vulnerabilities), NOW()
+      FROM vulnerability_data vd
+      RETURNING *
+    variables:
+      scanId: UUID!
+      userId: UUID!
+      provider: String!
+      model: String!
+    response: AiAnalysis
+
+  # Update AI analysis confidence
+  updateAnalysisConfidence:
+    query: |
+      UPDATE ai_analysis
+      SET confidence_score = @confidence
+      WHERE analysis_id = @analysisId
+      RETURNING *
+    variables:
+      analysisId: UUID!
+      confidence: Float!
+    response: AiAnalysis
+
+  # Create bulk vulnerability risk assessments
+  createBulkRiskAssessments:
+    query: |
+      INSERT INTO ai_analysis (
+        analysis_id, scan_id, user_id, analysis_type, provider,
+        model, input_data, created_at
+      )
+      SELECT
+        gen_random_uuid(),
+        v.scan_id,
+        @userId,
+        'VULNERABILITY_ASSESSMENT',
+        @provider,
+        @model,
+        json_build_object(
+          'vulnerability_id', v.vulnerability_id,
+          'cve_id', v.cve_id,
+          'title', v.title,
+          'severity', v.severity,
+          'cvss_score', v.cvss_score,
+          'description', v.description,
+          'affected_component', v.affected_component
+        ),
+        NOW()
+      FROM vulnerabilities v
+      JOIN scans s ON v.scan_id = s.scan_id
+      WHERE s.user_id = @userId
+        AND v.vulnerability_id = ANY(@vulnerabilityIds)
+      RETURNING *
+    variables:
+      userId: UUID!
+      vulnerabilityIds: [UUID!]!
+      provider: String!
+      model: String!
+    response: AiAnalysis[]
+
+# Custom types for complex responses
+types:
+  AiAnalysisWithContext:
+    analysisId: UUID!
+    scanId: UUID
+    userId: UUID!
+    analysisType: AiAnalysisType!
+    provider: String!
+    model: String!
+    inputData: JSON!
+    analysisOutput: JSON
+    confidenceScore: Float
+    tokensUsed: Int
+    processingTimeMs: Int
+    estimatedCost: Float
+    createdAt: Timestamp!
+    completedAt: Timestamp
+    toolName: String
+    target: String
+    scanType: ScanType
+    analystEmail: String!
+
+  AiAnalysisResult:
+    analysisId: UUID!
+    scanId: UUID
+    analysisType: AiAnalysisType!
+    provider: String!
+    model: String!
+    analysisOutput: JSON
+    confidenceScore: Float
+    tokensUsed: Int
+    estimatedCost: Float
+    createdAt: Timestamp!
+    target: String
+    toolName: String
+
+  AiCostAnalytics:
+    analysisDate: Timestamp!
+    aiProvider: String!
+    model: String!
+    analysisType: AiAnalysisType!
+    analysisCount: Int!
+    totalTokens: Int!
+    totalCost: Float!
+    avgProcessingTime: Float!
+    avgConfidence: Float!
+
+  ThreatIntelligenceInsight:
+    threatCategory: String!
+    threatLevel: String!
+    occurrenceCount: Int!
+    avgConfidence: Float!
+    affectedTargets: String!
+    latestAnalysis: Timestamp!
+
+  VulnerabilityRiskAssessment:
+    vulnerabilityId: UUID!
+    cveId: String
+    title: String!
+    severity: VulnerabilitySeverity!
+    cvssScore: Float
+    aiRiskScore: String
+    attackProbability: String
+    businessImpact: String
+    recommendedPriority: String
+    confidenceScore: Float
+    analysisDate: Timestamp!
+
+  AiModelPerformance:
+    aiProvider: String!
+    model: String!
+    analysisType: AiAnalysisType!
+    totalAnalyses: Int!
+    avgConfidence: Float!
+    avgProcessingTime: Float!
+    avgTokensUsed: Float!
+    totalCost: Float!
+    firstUsed: Timestamp!
+    lastUsed: Timestamp!

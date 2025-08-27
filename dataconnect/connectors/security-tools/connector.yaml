@@ -1,0 +1,222 @@
+# Security Tools Connector Configuration
+# Manages security tool operations, scans, and tool execution tracking
+
+connector: security-tools
+
+# Queries for retrieving security tool data
+queries:
+  # Get all available security tools
+  getAllSecurityTools:
+    query: |
+      SELECT * FROM security_tools
+      WHERE is_enabled = true
+      ORDER BY category, tool_name
+    response: SecurityTool[]
+
+  # Get security tool by ID
+  getSecurityToolById:
+    query: |
+      SELECT * FROM security_tools
+      WHERE tool_id = @toolId
+    variables:
+      toolId: UUID!
+    response: SecurityTool
+
+  # Get tools by category
+  getToolsByCategory:
+    query: |
+      SELECT * FROM security_tools
+      WHERE category = @category AND is_enabled = true
+      ORDER BY tool_name
+    variables:
+      category: ToolCategory!
+    response: SecurityTool[]
+
+  # Get user's recent scans
+  getUserRecentScans:
+    query: |
+      SELECT s.*, st.tool_name, st.category
+      FROM scans s
+      LEFT JOIN security_tools st ON s.tool_name = st.tool_name
+      WHERE s.user_id = @userId
+      ORDER BY s.started_at DESC
+      LIMIT @limit
+    variables:
+      userId: UUID!
+      limit: Int = 10
+    response: Scan[]
+
+  # Get scan details with vulnerabilities
+  getScanWithVulnerabilities:
+    query: |
+      SELECT s.*,
+             array_agg(v.*) as vulnerabilities,
+             COUNT(v.vulnerability_id) as vulnerability_count
+      FROM scans s
+      LEFT JOIN vulnerabilities v ON s.scan_id = v.scan_id
+      WHERE s.scan_id = @scanId
+      GROUP BY s.scan_id
+    variables:
+      scanId: UUID!
+    response: ScanWithVulnerabilities
+
+  # Get scan statistics
+  getScanStatistics:
+    query: |
+      SELECT
+        COUNT(*) as total_scans,
+        COUNT(CASE WHEN status = 'COMPLETED' THEN 1 END) as completed_scans,
+        COUNT(CASE WHEN status = 'FAILED' THEN 1 END) as failed_scans,
+        COUNT(CASE WHEN status = 'RUNNING' THEN 1 END) as running_scans,
+        AVG(duration_seconds) as avg_duration
+      FROM scans
+      WHERE user_id = @userId
+        AND started_at >= @startDate
+    variables:
+      userId: UUID!
+      startDate: Timestamp!
+    response: ScanStatistics
+
+# Mutations for creating and updating security tool data
+mutations:
+  # Create a new security scan
+  createSecurityScan:
+    query: |
+      INSERT INTO scans (
+        scan_id, user_id, tool_name, target, scan_type,
+        status, started_at, configuration
+      ) VALUES (
+        gen_random_uuid(), @userId, @toolName, @target, @scanType,
+        'PENDING', NOW(), @configuration
+      )
+      RETURNING *
+    variables:
+      userId: UUID!
+      toolName: String!
+      target: String!
+      scanType: ScanType!
+      configuration: JSON
+    response: Scan
+
+  # Update scan status and results
+  updateScanStatus:
+    query: |
+      UPDATE scans
+      SET status = @status,
+          completed_at = CASE WHEN @status IN ('COMPLETED', 'FAILED', 'CANCELLED')
+                             THEN NOW() ELSE completed_at END,
+          duration_seconds = CASE WHEN @status IN ('COMPLETED', 'FAILED', 'CANCELLED')
+                                THEN EXTRACT(EPOCH FROM (NOW() - started_at))::int
+                                ELSE duration_seconds END,
+          results = COALESCE(@results, results),
+          error_message = @errorMessage
+      WHERE scan_id = @scanId
+      RETURNING *
+    variables:
+      scanId: UUID!
+      status: ScanStatus!
+      results: JSON
+      errorMessage: String
+    response: Scan
+
+  # Create vulnerability from scan results
+  createVulnerability:
+    query: |
+      INSERT INTO vulnerabilities (
+        vulnerability_id, scan_id, cve_id, title, description,
+        severity, cvss_score, affected_component, attack_vector,
+        exploit_available, recommendation, status, discovered_at
+      ) VALUES (
+        gen_random_uuid(), @scanId, @cveId, @title, @description,
+        @severity, @cvssScore, @affectedComponent, @attackVector,
+        @exploitAvailable, @recommendation, 'OPEN', NOW()
+      )
+      RETURNING *
+    variables:
+      scanId: UUID!
+      cveId: String
+      title: String!
+      description: String!
+      severity: VulnerabilitySeverity!
+      cvssScore: Float
+      affectedComponent: String
+      attackVector: String
+      exploitAvailable: Boolean = false
+      recommendation: String
+    response: Vulnerability
+
+  # Update vulnerability status
+  updateVulnerabilityStatus:
+    query: |
+      UPDATE vulnerabilities
+      SET status = @status,
+          confirmed_at = CASE WHEN @status = 'CONFIRMED' THEN NOW() ELSE confirmed_at END,
+          resolved_at = CASE WHEN @status IN ('FIXED', 'MITIGATED') THEN NOW() ELSE resolved_at END
+      WHERE vulnerability_id = @vulnerabilityId
+      RETURNING *
+    variables:
+      vulnerabilityId: UUID!
+      status: VulnerabilityStatus!
+    response: Vulnerability
+
+  # Track tool execution
+  createToolExecution:
+    query: |
+      INSERT INTO tool_executions (
+        execution_id, tool_id, user_id, scan_id, command,
+        arguments, environment, status, started_at
+      ) VALUES (
+        gen_random_uuid(), @toolId, @userId, @scanId, @command,
+        @arguments, @environment, 'RUNNING', NOW()
+      )
+      RETURNING *
+    variables:
+      toolId: UUID!
+      userId: UUID!
+      scanId: UUID
+      command: String!
+      arguments: JSON
+      environment: JSON
+    response: ToolExecution
+
+  # Complete tool execution
+  completeToolExecution:
+    query: |
+      UPDATE tool_executions
+      SET status = @status,
+          completed_at = NOW(),
+          duration_ms = EXTRACT(EPOCH FROM (NOW() - started_at))::int * 1000,
+          stdout = @stdout,
+          stderr = @stderr,
+          exit_code = @exitCode
+      WHERE execution_id = @executionId
+      RETURNING *
+    variables:
+      executionId: UUID!
+      status: ExecutionStatus!
+      stdout: String
+      stderr: String
+      exitCode: Int
+    response: ToolExecution
+
+# Custom types for complex responses
+types:
+  ScanWithVulnerabilities:
+    scanId: UUID!
+    userId: UUID!
+    toolName: String!
+    target: String!
+    scanType: ScanType!
+    status: ScanStatus!
+    startedAt: Timestamp!
+    completedAt: Timestamp
+    results: JSON
+    vulnerabilities: [Vulnerability!]!
+    vulnerabilityCount: Int!
+
+  ScanStatistics:
+    totalScans: Int!
+    completedScans: Int!
+    failedScans: Int!
+    runningScans: Int!
+    avgDuration: Float

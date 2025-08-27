@@ -1,0 +1,37 @@
+{
+  "name": "LANCELOTT-MCP-Redis",
+  "version": "2.1.0",
+  "description": "MCP Server for Redis integration with LANCELOTT Framework",
+  "servers": [
+    {
+      "id": "redis-server",
+      "name": "LANCELOTT Redis Server",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-redis", "redis://localhost:6379/0"],
+      "env": {
+        "REDIS_URL": "redis://localhost:6379/0",
+        "DEBUG": "mcp:*"
+      }
+    },
+    {
+      "id": "chart-server",
+      "name": "MCP Chart Server",
+      "command": "npx",
+      "args": ["-y", "@antv/mcp-server-chart"]
+    },
+    {
+      "id": "file-server",
+      "name": "MCP File Server",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-file"]
+    }
+  ],
+  "workspace": {
+    "path": "./agent-tars-workspace",
+    "toolsPath": "./agent-tars-workspace/tools"
+  },
+  "logging": {
+    "level": "info",
+    "file": "./logs/mcp-servers.log"
+  }
+}

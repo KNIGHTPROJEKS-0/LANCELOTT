@@ -1,0 +1,43 @@
+# Firebase Data Connect Configuration for LANCELOTT
+# Enables GraphQL schema management and Firebase Data Connect Studio integration
+
+specVersion: v1alpha
+
+# Service configuration
+serviceId: lancelott-dataconnect
+location: us-central1
+
+# Schema configuration
+schema:
+  source: ./dataconnect
+  datasource:
+    postgresql:
+      database: lancelott-db
+      cloudSql:
+        instanceId: lancelott-z9dko:us-central1:lancelott-sql
+
+# Data Connect Studio configuration
+studio:
+  enabled: true
+  playground: true
+
+# Development configuration
+dev:
+  localConnectionString: "postgresql://localhost:5432/lancelott_dev?sslmode=disable"
+
+# Security and access configuration
+connectors:
+  - source: ./dataconnect/connectors/security-tools
+    id: security-tools
+  - source: ./dataconnect/connectors/user-management
+    id: user-management
+  - source: ./dataconnect/connectors/scan-results
+    id: scan-results
+  - source: ./dataconnect/connectors/ai-analysis
+    id: ai-analysis
+
+# Extensions and integrations
+extensions:
+  - firebase-auth
+  - cloud-sql
+  - vertex-ai

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Lance - Agent-TARS Entry Point
+# LANCELOTT Framework
+# Quick access to Agent-TARS CLI
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo "🚀 LANCE - Agent-TARS CLI Launcher"
+echo "🛡️ LANCELOTT Security Framework"
+echo "================================="
+echo ""
+
+# Execute the Agent-TARS launch script
+exec "$SCRIPT_DIR/scripts/launch_agent_tars.sh" "$@"

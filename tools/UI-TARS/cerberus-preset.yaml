@@ -1,0 +1,30 @@
+# CERBERUS UI-TARS Optimized Preset
+# Configured for Hugging Face UI-TARS-1.5-7B model - the recommended model for GUI automation
+
+# Language Setting
+language: en
+
+# VLM Configuration - Hugging Face UI-TARS-1.5 (Recommended for GUI tasks)
+vlmProvider: huggingface
+vlmBaseUrl: https://api-inference.huggingface.co/models/bytedance-research/UI-TARS-1.5-7B/v1
+vlmApiKey: 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
+vlmModelName: bytedance-research/UI-TARS-1.5-7B
+
+# Response API Support (Hugging Face supports this)
+useResponsesApi: true
+
+# Operator Configuration
+operator: Local Computer Operator
+
+# Performance Settings optimized for UI-TARS
+screenshotScale: 1.0
+maxLoopCount: 50
+loopIntervalInMs: 2000
+
+# Browser Settings
+searchEngineForBrowser: google
+
+# UI-TARS Specific Settings
+enableScreenshotOptimization: true
+actionTimeout: 30000
+waitForElementTimeout: 10000

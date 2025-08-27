@@ -1,0 +1,155 @@
+{
+  "nmap": {
+    "name": "Nmap",
+    "executable_path": "nmap/nmap",
+    "wrapper_module": "integrations.tools.nmap_wrapper",
+    "config_file": null,
+    "port": 7001,
+    "dependencies": ["gcc", "make"],
+    "enabled": false
+  },
+  "argus": {
+    "name": "Argus",
+    "executable_path": "tools/Argus/argus.py",
+    "wrapper_module": "integrations.tools.argus_wrapper",
+    "config_file": null,
+    "port": 7002,
+    "dependencies": ["python3", "pip"],
+    "enabled": true
+  },
+  "kraken": {
+    "name": "Kraken",
+    "executable_path": "tools/Kraken/kraken.py",
+    "wrapper_module": "integrations.tools.kraken_wrapper",
+    "config_file": null,
+    "port": 7003,
+    "dependencies": ["python3", "pip"],
+    "enabled": true
+  },
+  "metabigor": {
+    "name": "Metabigor",
+    "executable_path": "tools/Metabigor/metabigor",
+    "wrapper_module": "integrations.tools.metabigor_wrapper",
+    "config_file": null,
+    "port": 7004,
+    "dependencies": ["go"],
+    "enabled": true
+  },
+  "osmedeus": {
+    "name": "Osmedeus",
+    "executable_path": "tools/Osmedeus/osmedeus",
+    "wrapper_module": "integrations.tools.osmedeus_wrapper",
+    "config_file": null,
+    "port": 7005,
+    "dependencies": ["go"],
+    "enabled": true
+  },
+  "spiderfoot": {
+    "name": "SpiderFoot",
+    "executable_path": "tools/Spiderfoot/sf.py",
+    "wrapper_module": "integrations.tools.spiderfoot_wrapper",
+    "config_file": null,
+    "port": 7006,
+    "dependencies": ["python3", "pip"],
+    "enabled": true
+  },
+  "social_analyzer": {
+    "name": "Social-Analyzer",
+    "executable_path": "tools/Social-Analyzer/app.py",
+    "wrapper_module": "integrations.tools.social_analyzer_wrapper",
+    "config_file": null,
+    "port": 7007,
+    "dependencies": ["python3", "pip"],
+    "enabled": true
+  },
+  "phonesploit": {
+    "name": "PhoneSploit-Pro",
+    "executable_path": "tools/PhoneSploit-Pro/phonesploitpro.py",
+    "wrapper_module": "integrations.tools.phonesploit_wrapper",
+    "config_file": null,
+    "port": 7008,
+    "dependencies": ["python3", "pip"],
+    "enabled": false
+  },
+  "vajra": {
+    "name": "Vajra",
+    "executable_path": "tools/Vajra/vajra.py",
+    "wrapper_module": "integrations.tools.vajra_wrapper",
+    "config_file": null,
+    "port": 7009,
+    "dependencies": ["python3", "pip"],
+    "enabled": true
+  },
+  "storm_breaker": {
+    "name": "Storm-Breaker",
+    "executable_path": "tools/Storm-Breaker/st.py",
+    "wrapper_module": "integrations.tools.storm_breaker_wrapper",
+    "config_file": null,
+    "port": 7010,
+    "dependencies": ["python3", "pip"],
+    "enabled": false
+  },
+  "dismap": {
+    "name": "Dismap",
+    "executable_path": "tools/dismap/dismap",
+    "wrapper_module": "integrations.tools.dismap_wrapper",
+    "config_file": null,
+    "port": 7011,
+    "dependencies": ["go"],
+    "enabled": true
+  },
+  "hydra": {
+    "name": "THC-Hydra",
+    "executable_path": "tools/THC-Hydra/hydra",
+    "wrapper_module": "integrations.tools.hydra_wrapper",
+    "config_file": null,
+    "port": 7012,
+    "dependencies": ["gcc", "make"],
+    "enabled": true
+  },
+  "webstor": {
+    "name": "Webstor",
+    "executable_path": "tools/Webstor/webstor.py",
+    "wrapper_module": "integrations.tools.webstor_wrapper",
+    "config_file": null,
+    "port": 7013,
+    "dependencies": ["python3", "pip"],
+    "enabled": false
+  },
+  "sherlock": {
+    "name": "SHERLOCK",
+    "executable_path": "tools/SHERLOCK/sherlock_project/sherlock.py",
+    "wrapper_module": "integrations.tools.sherlock_wrapper",
+    "config_file": null,
+    "port": 7014,
+    "dependencies": ["python3", "pip"],
+    "enabled": true
+  },
+  "redteam_toolkit": {
+    "name": "RedTeam-ToolKit",
+    "executable_path": "tools/RedTeam-ToolKit/manage.py",
+    "wrapper_module": "integrations.tools.redteam_toolkit_wrapper",
+    "config_file": null,
+    "port": 7015,
+    "dependencies": ["python3", "pip"],
+    "enabled": true
+  },
+  "ui_tars": {
+    "name": "UI-TARS",
+    "executable_path": "tools/UI-TARS/apps/ui-tars/src/main/main.ts",
+    "wrapper_module": "integrations.tools.ui_tars_wrapper",
+    "config_file": null,
+    "port": 7016,
+    "dependencies": ["node", "npm"],
+    "enabled": false
+  },
+  "web_check": {
+    "name": "Web-Check",
+    "executable_path": "tools/Web-Check/server.js",
+    "wrapper_module": "integrations.tools.web_check_wrapper",
+    "config_file": null,
+    "port": 7017,
+    "dependencies": ["node", "npm"],
+    "enabled": false
+  }
+}

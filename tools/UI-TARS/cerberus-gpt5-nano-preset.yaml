@@ -1,0 +1,59 @@
+# CERBERUS GPT-5-Nano Preset for UI-TARS
+# Using Azure AI Foundry GPT-5-Nano model for optimal GUI automation
+# Optimized for security tasks and CERBERUS-FANGS integration
+
+# Language Setting
+language: en
+
+# VLM Configuration - Azure AI Foundry GPT-5-Nano
+vlmProvider: azure
+vlmBaseUrl: https://gujil-mensn3og-eastus2.cognitiveservices.azure.com/openai/responses?api-version=2025-04-01-preview
+vlmApiKey: 5c1Yf4Wjer5DDsltfNgtK4xfrhCnA33katu9fnhScnGlLFyQgJTZJQQJ99BHACHYHv6XJ3w3AAAAACOGOeiK
+vlmModelName: gpt-5-nano
+
+# Response API Support (Azure AI Foundry supports this)
+useResponsesApi: true
+
+# Operator Configuration
+operator: Local Computer Operator
+
+# Performance Settings optimized for GPT-5-Nano
+screenshotScale: 1.0
+maxLoopCount: 50
+loopIntervalInMs: 2000
+
+# Browser Settings
+searchEngineForBrowser: google
+
+# GPT-5-Nano Specific Settings
+enableVisionCapabilities: true
+maxTokens: 16384
+maxCompletionTokens: 16384
+temperature: 0.1
+topP: 0.9
+
+# CERBERUS-FANGS Security Optimizations
+enableSecurityMode: true
+enableScreenshotOptimization: true
+actionTimeout: 30000
+waitForElementTimeout: 10000
+
+# Framework Integration
+frameworkIntegration: true
+frameworkApiUrl: http://localhost:7777
+frameworkAuth: true
+authType: firebase
+apiKey: AIzaSyD0RkGeip2f2rc29YSMHy5w6YeD-5VgriA
+
+# UI-TARS Desktop Configuration
+desktopMode: true
+webInterface: true
+webPort: 5173
+internalPort: 8765
+
+# Security Task Optimization
+securityTasks:
+  enablePenetrationTesting: true
+  enableVulnerabilityScanning: true
+  enableAutomatedReporting: true
+  enableScreenshotAnalysis: true

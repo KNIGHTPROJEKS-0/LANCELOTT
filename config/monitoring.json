@@ -1,0 +1,101 @@
+{
+  "check_interval": 30,
+  "timeout": 10,
+  "retry_attempts": 3,
+  "components": {
+    "fastapi": {
+      "type": "api",
+      "url": "http://localhost:7777/health",
+      "port": 7777,
+      "critical": true
+    },
+    "n8n": {
+      "type": "service",
+      "url": "http://localhost:5678/healthz",
+      "port": 5678,
+      "critical": false
+    },
+    "supergateway": {
+      "type": "integration",
+      "url": "http://localhost:3000/health",
+      "port": 3000,
+      "critical": true
+    },
+    "supercompat": {
+      "type": "integration",
+      "url": "http://localhost:3001/health",
+      "port": 3001,
+      "critical": true
+    }
+  },
+  "tools": {
+    "nmap": {
+      "port": 7001,
+      "executable": "nmap/nmap"
+    },
+    "argus": {
+      "port": 7002,
+      "executable": "tools/Argus/argus.py"
+    },
+    "kraken": {
+      "port": 7003,
+      "executable": "tools/Kraken/kraken.py"
+    },
+    "metabigor": {
+      "port": 7004,
+      "executable": "tools/Metabigor/metabigor"
+    },
+    "osmedeus": {
+      "port": 7005,
+      "executable": "tools/Osmedeus/osmedeus"
+    },
+    "spiderfoot": {
+      "port": 7006,
+      "executable": "tools/Spiderfoot/sf.py"
+    },
+    "social_analyzer": {
+      "port": 7007,
+      "executable": "tools/Social-Analyzer/app.py"
+    },
+    "phonesploit": {
+      "port": 7008,
+      "executable": "tools/PhoneSploit-Pro/phonesploitpro.py"
+    },
+    "vajra": {
+      "port": 7009,
+      "executable": "tools/Vajra/vajra.py"
+    },
+    "storm_breaker": {
+      "port": 7010,
+      "executable": "tools/Storm-Breaker/st.py"
+    },
+    "dismap": {
+      "port": 7011,
+      "executable": "tools/dismap/dismap"
+    },
+    "hydra": {
+      "port": 7012,
+      "executable": "tools/THC-Hydra/hydra"
+    },
+    "webstor": {
+      "port": 7013,
+      "executable": "tools/Webstor/webstor.py"
+    },
+    "sherlock": {
+      "port": 7014,
+      "executable": "tools/SHERLOCK/sherlock_project/sherlock.py"
+    },
+    "redteam_toolkit": {
+      "port": 7015,
+      "executable": "tools/RedTeam-ToolKit/manage.py"
+    },
+    "ui_tars": {
+      "port": 7016,
+      "executable": "tools/UI-TARS/apps/ui-tars/src/main/main.ts"
+    },
+    "web_check": {
+      "port": 7017,
+      "executable": "tools/Web-Check/server.js"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# UI-TARS Entry Point Script
+# LANCELOTT Framework
+# Launch UI-TARS Desktop from root directory
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Execute the UI-TARS launch script
+exec "$SCRIPT_DIR/scripts/launch_ui_tars.sh" "$@"

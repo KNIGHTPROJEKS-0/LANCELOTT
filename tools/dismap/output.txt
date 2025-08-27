@@ -1,0 +1,1 @@
+17:58:47, tls, https, [200] [Apache-Shiro] [DFE-SCADA], https://www.google.com:443, Google

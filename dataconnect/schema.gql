@@ -1,0 +1,373 @@
+# LANCELOTT Security Framework - GraphQL Schema
+# Comprehensive data model for security tools, scans, and AI analysis
+
+# User Management Types
+type User @table(name: "users") {
+  id: UUID! @col(name: "user_id")
+  email: String! @col(name: "email")
+  displayName: String @col(name: "display_name")
+  role: UserRole! @col(name: "role")
+  createdAt: Timestamp! @col(name: "created_at")
+  updatedAt: Timestamp! @col(name: "updated_at")
+  isActive: Boolean! @col(name: "is_active")
+  lastLoginAt: Timestamp @col(name: "last_login_at")
+
+  # Relationships
+  scans: [Scan!]! @hasMany(fields: ["id"], references: ["userId"])
+  reports: [Report!]! @hasMany(fields: ["id"], references: ["userId"])
+  apiKeys: [ApiKey!]! @hasMany(fields: ["id"], references: ["userId"])
+}
+
+enum UserRole {
+  ADMIN
+  SECURITY_ANALYST
+  PENETRATION_TESTER
+  VIEWER
+}
+
+# Security Scan Types
+type Scan @table(name: "scans") {
+  id: UUID! @col(name: "scan_id")
+  userId: UUID! @col(name: "user_id")
+  toolName: String! @col(name: "tool_name")
+  target: String! @col(name: "target")
+  scanType: ScanType! @col(name: "scan_type")
+  status: ScanStatus! @col(name: "status")
+  startedAt: Timestamp! @col(name: "started_at")
+  completedAt: Timestamp @col(name: "completed_at")
+  duration: Int @col(name: "duration_seconds")
+
+  # Configuration and Results
+  configuration: JSON @col(name: "configuration")
+  results: JSON @col(name: "results")
+  metadata: JSON @col(name: "metadata")
+
+  # Error handling
+  errorMessage: String @col(name: "error_message")
+
+  # Relationships
+  user: User! @hasOne(fields: ["userId"], references: ["id"])
+  vulnerabilities: [Vulnerability!]!
+    @hasMany(fields: ["id"], references: ["scanId"])
+  aiAnalysis: [AiAnalysis!]! @hasMany(fields: ["id"], references: ["scanId"])
+}
+
+enum ScanType {
+  NETWORK_SCAN
+  WEB_SECURITY
+  OSINT_GATHERING
+  ASSET_DISCOVERY
+  SOCIAL_ENGINEERING
+  MOBILE_SECURITY
+  CLOUD_SECURITY
+  VULNERABILITY_SCAN
+  PENETRATION_TEST
+}
+
+enum ScanStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+  PAUSED
+}
+
+# Vulnerability Management
+type Vulnerability @table(name: "vulnerabilities") {
+  id: UUID! @col(name: "vulnerability_id")
+  scanId: UUID! @col(name: "scan_id")
+  cveId: String @col(name: "cve_id")
+  title: String! @col(name: "title")
+  description: String! @col(name: "description")
+  severity: VulnerabilitySeverity! @col(name: "severity")
+  cvssScore: Float @col(name: "cvss_score")
+
+  # Technical details
+  affectedComponent: String @col(name: "affected_component")
+  attackVector: String @col(name: "attack_vector")
+  exploitAvailable: Boolean! @col(name: "exploit_available")
+
+  # Remediation
+  recommendation: String @col(name: "recommendation")
+  status: VulnerabilityStatus! @col(name: "status")
+
+  # Timestamps
+  discoveredAt: Timestamp! @col(name: "discovered_at")
+  confirmedAt: Timestamp @col(name: "confirmed_at")
+  resolvedAt: Timestamp @col(name: "resolved_at")
+
+  # Relationships
+  scan: Scan! @hasOne(fields: ["scanId"], references: ["id"])
+}
+
+enum VulnerabilitySeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  INFO
+}
+
+enum VulnerabilityStatus {
+  OPEN
+  CONFIRMED
+  FALSE_POSITIVE
+  FIXED
+  MITIGATED
+  ACCEPTED_RISK
+}
+
+# AI Analysis and Intelligence
+type AiAnalysis @table(name: "ai_analysis") {
+  id: UUID! @col(name: "analysis_id")
+  scanId: UUID @col(name: "scan_id")
+  userId: UUID! @col(name: "user_id")
+  analysisType: AiAnalysisType! @col(name: "analysis_type")
+  provider: String! @col(name: "ai_provider")
+  model: String! @col(name: "model")
+
+  # Input and Output
+  inputData: JSON! @col(name: "input_data")
+  output: JSON! @col(name: "analysis_output")
+  confidence: Float @col(name: "confidence_score")
+
+  # Processing details
+  tokensUsed: Int @col(name: "tokens_used")
+  processingTime: Int @col(name: "processing_time_ms")
+  cost: Float @col(name: "estimated_cost")
+
+  # Timestamps
+  createdAt: Timestamp! @col(name: "created_at")
+  completedAt: Timestamp @col(name: "completed_at")
+
+  # Relationships
+  scan: Scan @hasOne(fields: ["scanId"], references: ["id"])
+  user: User! @hasOne(fields: ["userId"], references: ["id"])
+}
+
+enum AiAnalysisType {
+  VULNERABILITY_ASSESSMENT
+  THREAT_INTELLIGENCE
+  RISK_ANALYSIS
+  ATTACK_PATH_ANALYSIS
+  REPORT_GENERATION
+  RECOMMENDATION_ENGINE
+  BEHAVIORAL_ANALYSIS
+}
+
+# Security Tools Configuration
+type SecurityTool @table(name: "security_tools") {
+  id: UUID! @col(name: "tool_id")
+  name: String! @col(name: "tool_name")
+  category: ToolCategory! @col(name: "category")
+  version: String @col(name: "version")
+  isEnabled: Boolean! @col(name: "is_enabled")
+
+  # Configuration
+  defaultConfig: JSON @col(name: "default_configuration")
+  supportedTargets: [String!]! @col(name: "supported_targets")
+
+  # Status and health
+  status: ToolStatus! @col(name: "status")
+  lastHealthCheck: Timestamp @col(name: "last_health_check")
+
+  # Metadata
+  description: String @col(name: "description")
+  documentation: String @col(name: "documentation_url")
+
+  # Relationships
+  executions: [ToolExecution!]! @hasMany(fields: ["id"], references: ["toolId"])
+}
+
+enum ToolCategory {
+  NETWORK_SCANNER
+  WEB_SECURITY
+  OSINT
+  VULNERABILITY_SCANNER
+  EXPLOITATION
+  FORENSICS
+  SOCIAL_ENGINEERING
+  MOBILE_SECURITY
+  CLOUD_SECURITY
+  AI_POWERED
+}
+
+enum ToolStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+  ERROR
+  UPDATING
+}
+
+# Tool Execution Tracking
+type ToolExecution @table(name: "tool_executions") {
+  id: UUID! @col(name: "execution_id")
+  toolId: UUID! @col(name: "tool_id")
+  userId: UUID! @col(name: "user_id")
+  scanId: UUID @col(name: "scan_id")
+
+  # Execution details
+  command: String! @col(name: "command")
+  arguments: JSON @col(name: "arguments")
+  environment: JSON @col(name: "environment")
+
+  # Status and timing
+  status: ExecutionStatus! @col(name: "status")
+  startedAt: Timestamp! @col(name: "started_at")
+  completedAt: Timestamp @col(name: "completed_at")
+  duration: Int @col(name: "duration_ms")
+
+  # Output and results
+  stdout: String @col(name: "stdout")
+  stderr: String @col(name: "stderr")
+  exitCode: Int @col(name: "exit_code")
+
+  # Relationships
+  tool: SecurityTool! @hasOne(fields: ["toolId"], references: ["id"])
+  user: User! @hasOne(fields: ["userId"], references: ["id"])
+  scan: Scan @hasOne(fields: ["scanId"], references: ["id"])
+}
+
+enum ExecutionStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  TIMEOUT
+  CANCELLED
+}
+
+# Reports and Documentation
+type Report @table(name: "reports") {
+  id: UUID! @col(name: "report_id")
+  userId: UUID! @col(name: "user_id")
+  title: String! @col(name: "title")
+  reportType: ReportType! @col(name: "report_type")
+  format: ReportFormat! @col(name: "format")
+
+  # Content
+  content: JSON! @col(name: "content")
+  summary: String @col(name: "executive_summary")
+
+  # Metadata
+  tags: [String!]! @col(name: "tags")
+  isPublic: Boolean! @col(name: "is_public")
+
+  # Timestamps
+  createdAt: Timestamp! @col(name: "created_at")
+  updatedAt: Timestamp! @col(name: "updated_at")
+
+  # File storage
+  fileUrl: String @col(name: "file_url")
+  fileSize: Int @col(name: "file_size_bytes")
+
+  # Relationships
+  user: User! @hasOne(fields: ["userId"], references: ["id"])
+  scans: [Scan!]! @manyToMany(junction: "report_scans")
+}
+
+enum ReportType {
+  VULNERABILITY_REPORT
+  PENETRATION_TEST_REPORT
+  COMPLIANCE_REPORT
+  THREAT_ASSESSMENT
+  EXECUTIVE_SUMMARY
+  TECHNICAL_ANALYSIS
+  CUSTOM_REPORT
+}
+
+enum ReportFormat {
+  PDF
+  HTML
+  JSON
+  MARKDOWN
+  DOCX
+  CSV
+}
+
+# API Key Management
+type ApiKey @table(name: "api_keys") {
+  id: UUID! @col(name: "key_id")
+  userId: UUID! @col(name: "user_id")
+  name: String! @col(name: "key_name")
+  keyHash: String! @col(name: "key_hash")
+
+  # Permissions and scope
+  permissions: [Permission!]! @col(name: "permissions")
+  scope: String @col(name: "scope")
+
+  # Status and expiration
+  isActive: Boolean! @col(name: "is_active")
+  expiresAt: Timestamp @col(name: "expires_at")
+  lastUsedAt: Timestamp @col(name: "last_used_at")
+  usageCount: Int! @col(name: "usage_count")
+
+  # Rate limiting
+  rateLimit: Int @col(name: "rate_limit_per_hour")
+
+  # Timestamps
+  createdAt: Timestamp! @col(name: "created_at")
+
+  # Relationships
+  user: User! @hasOne(fields: ["userId"], references: ["id"])
+}
+
+enum Permission {
+  READ_SCANS
+  WRITE_SCANS
+  DELETE_SCANS
+  READ_REPORTS
+  WRITE_REPORTS
+  DELETE_REPORTS
+  MANAGE_TOOLS
+  ADMIN_ACCESS
+  AI_ANALYSIS
+  EXPORT_DATA
+}
+
+# System Configuration and Settings
+type SystemSetting @table(name: "system_settings") {
+  id: UUID! @col(name: "setting_id")
+  key: String! @col(name: "setting_key")
+  value: JSON! @col(name: "setting_value")
+  description: String @col(name: "description")
+  category: SettingCategory! @col(name: "category")
+  isPublic: Boolean! @col(name: "is_public")
+
+  # Timestamps
+  createdAt: Timestamp! @col(name: "created_at")
+  updatedAt: Timestamp! @col(name: "updated_at")
+  updatedBy: UUID @col(name: "updated_by")
+}
+
+enum SettingCategory {
+  SECURITY
+  PERFORMANCE
+  INTEGRATION
+  UI_UX
+  NOTIFICATIONS
+  AI_CONFIG
+  TOOL_CONFIG
+}
+
+# Audit Logs
+type AuditLog @table(name: "audit_logs") {
+  id: UUID! @col(name: "log_id")
+  userId: UUID @col(name: "user_id")
+  action: String! @col(name: "action")
+  resource: String! @col(name: "resource")
+  resourceId: UUID @col(name: "resource_id")
+
+  # Details
+  details: JSON @col(name: "details")
+  ipAddress: String @col(name: "ip_address")
+  userAgent: String @col(name: "user_agent")
+
+  # Timestamp
+  createdAt: Timestamp! @col(name: "created_at")
+
+  # Relationships
+  user: User @hasOne(fields: ["userId"], references: ["id"])
+}

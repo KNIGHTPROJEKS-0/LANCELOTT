@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Agent-TARS Entry Point Script
+# LANCELOTT Framework
+# Launch Agent-TARS CLI from root directory
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Execute the Agent-TARS launch script
+exec "$SCRIPT_DIR/scripts/launch_agent_tars.sh" "$@"

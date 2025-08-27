@@ -1,0 +1,345 @@
+name: 🔧 Repository Setup & Maintenance
+
+on:
+  schedule:
+    # Run daily at 02:00 UTC
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      setup_type:
+        description: "Setup type to run"
+        required: true
+        default: "maintenance"
+        type: choice
+        options:
+          - full-setup
+          - maintenance
+          - security-audit
+          - dependencies-update
+
+jobs:
+  # ============================================================================
+  # Repository Setup
+  # ============================================================================
+  repository-setup:
+    name: 🏗️ Repository Setup
+    runs-on: ubuntu-latest
+    if: github.event.inputs.setup_type == 'full-setup' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏷️ Configure Repository Settings
+        run: |
+          # Configure repository description
+          gh repo edit --description "🛡️ LANCELOTT v2.1.0 Enhanced - AI-Powered Security Framework with Firebase Cloud Backend, LangChain AI Integration, 27+ Security Tools, and Unified API"
+
+          # Add repository topics
+          gh repo edit --add-topic cybersecurity
+          gh repo edit --add-topic penetration-testing
+          gh repo edit --add-topic security-tools
+          gh repo edit --add-topic fastapi
+          gh repo edit --add-topic firebase
+          gh repo edit --add-topic ai-integration
+          gh repo edit --add-topic langchain
+          gh repo edit --add-topic docker
+          gh repo edit --add-topic python
+          gh repo edit --add-topic typescript
+          gh repo edit --add-topic red-team
+          gh repo edit --add-topic osint
+          gh repo edit --add-topic vulnerability-scanner
+          gh repo edit --add-topic security-framework
+          gh repo edit --add-topic cloud-security
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📝 Setup Issue Templates
+        run: |
+          mkdir -p .github/ISSUE_TEMPLATE
+
+          # Bug report template
+          cat > .github/ISSUE_TEMPLATE/bug_report.md << 'EOF'
+          ---
+          name: 🐛 Bug Report
+          about: Create a report to help us improve LANCELOTT
+          title: '[BUG] '
+          labels: ['bug', 'needs-triage']
+          assignees: ''
+          ---
+
+          ## 🐛 Bug Description
+          A clear and concise description of what the bug is.
+
+          ## 🔄 Steps to Reproduce
+          1. Go to '...'
+          2. Click on '....'
+          3. Scroll down to '....'
+          4. See error
+
+          ## ✅ Expected Behavior
+          A clear and concise description of what you expected to happen.
+
+          ## 📱 Environment
+          - OS: [e.g. Ubuntu 20.04, macOS 12.0, Windows 11]
+          - Python Version: [e.g. 3.11.0]
+          - LANCELOTT Version: [e.g. 2.1.0]
+          - Browser: [if applicable]
+
+          ## 📋 Additional Context
+          Add any other context about the problem here.
+          EOF
+
+          # Feature request template
+          cat > .github/ISSUE_TEMPLATE/feature_request.md << 'EOF'
+          ---
+          name: ✨ Feature Request
+          about: Suggest an idea for LANCELOTT
+          title: '[FEATURE] '
+          labels: ['enhancement', 'needs-triage']
+          assignees: ''
+          ---
+
+          ## ✨ Feature Description
+          A clear and concise description of what you want to happen.
+
+          ## 🎯 Use Case
+          Describe the use case and why this feature would be valuable.
+
+          ## 🔧 Proposed Solution
+          A clear and concise description of what you want to happen.
+
+          ## 🔄 Alternatives Considered
+          A clear and concise description of any alternative solutions or features you've considered.
+
+          ## 📋 Additional Context
+          Add any other context or screenshots about the feature request here.
+          EOF
+
+          # Security vulnerability template
+          cat > .github/ISSUE_TEMPLATE/security_vulnerability.md << 'EOF'
+          ---
+          name: 🔒 Security Vulnerability
+          about: Report a security vulnerability (use private disclosure)
+          title: '[SECURITY] '
+          labels: ['security', 'priority-high']
+          assignees: ''
+          ---
+
+          ## ⚠️ Security Vulnerability Report
+
+          **Please do not report security vulnerabilities through public GitHub issues.**
+
+          Instead, please report them privately by:
+          1. Using GitHub's private vulnerability reporting feature
+          2. Emailing the maintainers directly
+
+          ## 🔍 Vulnerability Details
+          - **Type**: [e.g., XSS, SQL Injection, Authentication Bypass]
+          - **Severity**: [Critical/High/Medium/Low]
+          - **Affected Component**: [e.g., API endpoint, Firebase rules]
+
+          ## 🎯 Impact
+          Describe the potential impact of this vulnerability.
+
+          ## 🔧 Reproduction Steps
+          Provide steps to reproduce (if safe to share).
+          EOF
+
+      - name: 📋 Setup Pull Request Template
+        run: |
+          cat > .github/pull_request_template.md << 'EOF'
+          ## 📝 Description
+          Brief description of the changes introduced by this PR.
+
+          ## 🔄 Type of Change
+          - [ ] 🐛 Bug fix (non-breaking change which fixes an issue)
+          - [ ] ✨ New feature (non-breaking change which adds functionality)
+          - [ ] 💥 Breaking change (fix or feature that would cause existing functionality to not work as expected)
+          - [ ] 📚 Documentation update
+          - [ ] 🔧 Configuration change
+          - [ ] 🧪 Test addition or modification
+
+          ## 🧪 Testing
+          - [ ] I have tested these changes locally
+          - [ ] I have added/updated tests as necessary
+          - [ ] All existing tests pass
+          - [ ] I have tested the Firebase integration
+
+          ## 📋 Checklist
+          - [ ] My code follows the project's style guidelines
+          - [ ] I have performed a self-review of my own code
+          - [ ] I have commented my code, particularly in hard-to-understand areas
+          - [ ] I have made corresponding changes to the documentation
+          - [ ] My changes generate no new warnings
+          - [ ] I have checked that my changes don't break Firebase functionality
+
+          ## 🔗 Related Issues
+          Closes #(issue_number)
+
+          ## 📸 Screenshots (if applicable)
+          Add screenshots to help explain your changes.
+          EOF
+
+  # ============================================================================
+  # Dependency Updates
+  # ============================================================================
+  dependency-updates:
+    name: 📦 Dependency Updates
+    runs-on: ubuntu-latest
+    if: github.event.inputs.setup_type == 'dependencies-update' || github.event_name == 'schedule'
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: 🔍 Check for Python Updates
+        run: |
+          pip install pip-audit pur
+
+          # Check for security vulnerabilities
+          pip-audit --desc --format=json --output=security-audit.json || true
+
+          # Check for outdated packages
+          pip list --outdated --format=json > outdated-packages.json || true
+
+          # Generate requirements update
+          pur -r requirements.txt --dry-run > requirements-updates.txt || true
+
+      - name: 📊 Generate Dependency Report
+        run: |
+          echo "## 📦 Dependency Update Report" > dependency-report.md
+          echo "Generated on: $(date)" >> dependency-report.md
+          echo "" >> dependency-report.md
+
+          if [ -s security-audit.json ]; then
+            echo "### 🔒 Security Vulnerabilities Found" >> dependency-report.md
+            echo "Please review the security audit results." >> dependency-report.md
+            echo "" >> dependency-report.md
+          fi
+
+          if [ -s outdated-packages.json ]; then
+            echo "### 📈 Outdated Packages" >> dependency-report.md
+            echo "The following packages have updates available:" >> dependency-report.md
+            echo "" >> dependency-report.md
+          fi
+
+      - name: 📤 Upload Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-reports
+          path: |
+            security-audit.json
+            outdated-packages.json
+            requirements-updates.txt
+            dependency-report.md
+
+  # ============================================================================
+  # Security Audit
+  # ============================================================================
+  security-audit:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    if: github.event.inputs.setup_type == 'security-audit' || github.event_name == 'schedule'
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 Run Security Scans
+        uses: securecodewarrior/github-action-bandit@v1.0.1
+        with:
+          scan_path: "."
+          output_file: "bandit-security-report.json"
+
+      - name: 🔎 Scan for Secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: 📋 Firebase Security Review
+        run: |
+          echo "## 🔥 Firebase Security Review" > firebase-security.md
+          echo "Reviewing Firebase configuration for security best practices..." >> firebase-security.md
+          echo "" >> firebase-security.md
+
+          # Check Firestore rules
+          if [ -f "firestore.rules" ]; then
+            echo "✅ Firestore rules found" >> firebase-security.md
+          else
+            echo "❌ Firestore rules missing" >> firebase-security.md
+          fi
+
+          # Check Storage rules
+          if [ -f "storage.rules" ]; then
+            echo "✅ Storage rules found" >> firebase-security.md
+          else
+            echo "❌ Storage rules missing" >> firebase-security.md
+          fi
+
+          # Check for sensitive data in config
+          if grep -r "api.*key" . --include="*.json" --include="*.js" --include="*.ts" | grep -v ".git" | grep -v "node_modules"; then
+            echo "⚠️ Potential API keys found in code" >> firebase-security.md
+          else
+            echo "✅ No API keys found in code" >> firebase-security.md
+          fi
+
+  # ============================================================================
+  # Maintenance Tasks
+  # ============================================================================
+  maintenance:
+    name: 🧹 Maintenance Tasks
+    runs-on: ubuntu-latest
+    if: github.event.inputs.setup_type == 'maintenance' || github.event_name == 'schedule'
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: 🧹 Clean up Old Artifacts
+        run: |
+          # List artifacts older than 30 days
+          gh api repos/${{ github.repository }}/actions/artifacts \
+            --jq '.artifacts[] | select(.created_at < (now - 2592000 | strftime("%Y-%m-%dT%H:%M:%SZ"))) | .id' \
+          | xargs -I {} gh api repos/${{ github.repository }}/actions/artifacts/{} -X DELETE || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📊 Repository Statistics
+        run: |
+          echo "## 📊 Repository Statistics" > repo-stats.md
+          echo "Generated on: $(date)" >> repo-stats.md
+          echo "" >> repo-stats.md
+
+          # Count files by type
+          echo "### 📁 File Statistics" >> repo-stats.md
+          echo "- Python files: $(find . -name "*.py" | wc -l)" >> repo-stats.md
+          echo "- TypeScript/JavaScript files: $(find . -name "*.ts" -o -name "*.js" | wc -l)" >> repo-stats.md
+          echo "- Configuration files: $(find . -name "*.json" -o -name "*.yaml" -o -name "*.yml" | wc -l)" >> repo-stats.md
+          echo "- Documentation files: $(find . -name "*.md" | wc -l)" >> repo-stats.md
+          echo "" >> repo-stats.md
+
+          # Lines of code
+          echo "### 📏 Lines of Code" >> repo-stats.md
+          echo "- Total Python LOC: $(find . -name "*.py" -exec cat {} \; | wc -l)" >> repo-stats.md
+          echo "- Total TypeScript/JS LOC: $(find . -name "*.ts" -o -name "*.js" -exec cat {} \; | wc -l)" >> repo-stats.md
+
+      - name: 📤 Upload Statistics
+        uses: actions/upload-artifact@v3
+        with:
+          name: maintenance-reports
+          path: repo-stats.md
