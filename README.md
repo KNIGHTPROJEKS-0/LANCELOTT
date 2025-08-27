@@ -127,6 +127,10 @@ POST /api/v1/ai/langchainjs/execute-agent  # Agent execution
 
 ## Recent Changes
 <!-- QODER:RECENT_CHANGES:BEGIN -->
+- 2025-08-28 — **Integration:** TARS API Integration Complete → `docs/integration/TARS_API_INTEGRATION_COMPLETE.md`
+  Impact: Provides comprehensive REST API for TARS agent and UI management with Firebase logging and synchronization.
+- 2025-08-28 — **Setup:** Firebase Service Account Setup → `docs/setup/FIREBASE_SERVICE_ACCOUNT_SETUP.md`
+  Impact: Complete guide for Firebase configuration with security best practices and multi-environment support.
 - 2025-08-27 — **Integration:** UI-TARS Desktop & Agent-TARS CLI Integration Complete → `docs/integration/UI_TARS_INTEGRATION_COMPLETE.md`
   Impact: Adds advanced GUI automation capabilities with AI-powered interface understanding, entry points callable from root (ui-tars, agent-tars), and comprehensive API integration.
 - 2025-08-27 — **Integration:** Model Context Protocol (MCP) Servers Integration Complete → `docs/guides/MCP_INTEGRATION_FINAL_SUMMARY.md`
