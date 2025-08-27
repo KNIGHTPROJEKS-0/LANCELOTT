@@ -1,0 +1,17 @@
+{
+  "projects": {
+    "default": "lancelott-z9dko",
+    "production": "lancelott-z9dko",
+    "development": "lancelott-z9dko"
+  },
+  "targets": {
+    "lancelott-z9dko": {
+      "hosting": {
+        "lancelott-dashboard": [
+          "lancelott-z9dko"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
