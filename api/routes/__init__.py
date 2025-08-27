@@ -29,6 +29,7 @@ from .spiderfoot import router as spiderfoot_router
 from .storm_breaker import router as storm_breaker_router
 from .supercompat_router import router as supercompat_router
 from .supergateway_router import router as supergateway_router
+from .tars_api import router as tars_router
 from .ui_tars_router import router as ui_tars_router
 from .vajra import router as vajra_router
 from .vanguard_router import router as vanguard_router
@@ -72,4 +73,6 @@ __all__ = [
     "auth_router",
     # UI & GUI Automation
     "ui_tars_router",
+    # TARS Integration
+    "tars_router",
 ]
