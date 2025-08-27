@@ -51,12 +51,14 @@ from api.routes import (
     storm_breaker_router,
     supercompat_router,
     supergateway_router,
+    tars_router,
     vajra_router,
     vanguard_router,
     web_check_router,
     webstor_router,
 )
 from core.config import settings
+from core.firebase_config import initialize_firebase
 from core.logger_config import setup_logging
 from core.tool_manager import ToolManager
 from integrations.integration_manager import IntegrationManager
@@ -84,6 +86,15 @@ async def lifespan(app: FastAPI):
         integration_manager = IntegrationManager()
         status_monitor = StatusMonitor()
         n8n_integration = N8nIntegration()
+
+        # Initialize Firebase
+        firebase_success = initialize_firebase()
+        if firebase_success:
+            logger.info("✅ Firebase initialized successfully")
+        else:
+            logger.warning(
+                "⚠️ Firebase initialization failed - continuing without Firebase"
+            )
 
         # Initialize tool manager
         await tool_manager.initialize()
@@ -301,6 +312,9 @@ app.include_router(
 app.include_router(
     advanced_router, prefix="/api/v1/advanced", tags=["advanced", "orchestration"]
 )
+
+# Include TARS API routes
+app.include_router(tars_router, prefix="/api/v1/tars", tags=["tars", "agent", "ui"])
 
 
 # Enhanced API endpoints
