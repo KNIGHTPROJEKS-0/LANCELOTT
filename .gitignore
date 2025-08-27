@@ -1,8 +1,15 @@
-# Environment files
+# LANCELOTT Security Framework - GitIgnore Configuration
+# Environment and Secrets
 .env
 .env.local
 .env.production
 .env.staging
+*.env
+
+# Firebase Configuration (contains sensitive credentials)
+config/firebase/*.json
+firebase-debug.log
+.firebase/
 
 # Python
 __pycache__/
@@ -22,60 +29,93 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
-# Virtual environments
-venv/
+# Virtual Environments
+.env
+.venv
 env/
+venv/
 ENV/
-.venv/
+env.bak/
+venv.bak/
+.virtualenv
 
-# Go
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-*.test
-*.out
-go.work
+# PyInstaller
+*.manifest
+*.spec
 
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.npm
-.eslintcache
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+.coverage
+.pytest_cache/
+.coverage.*
 
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Jupyter Notebook
+.ipynb_checkpoints
 
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
+# IPython
+profile_default/
+ipython_config.py
 
-# Coverage directory used by tools like istanbul
-coverage/
-*.lcov
+# pyenv
+.python-version
 
-# IDE
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
+# OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -84,51 +124,175 @@ coverage/
 ehthumbs.db
 Thumbs.db
 
-# Temporary files
-*.tmp
-*.temp
-temp/
-tmp/
+# Node.js (for n8n and other Node components)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Results and output directories
-results/
-output/
-reports/
-scans/
+# Docker
+.dockerignore
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+jspm_the2/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
 
 # Database files
 *.db
 *.sqlite
 *.sqlite3
 
-# Credentials and sensitive files
-credentials.json
-config.json
-secrets.json
+# Security Tools Output
+reports/
+scans/
+results/
+outputs/
+
+# Redis dumps
+dump.rdb
+
+# Backup files
+*.bak
+*.backup
+
+# Archive files
+*.tar.gz
+*.zip
+*.rar
+
+# Key files and certificates
 *.key
 *.pem
+*.crt
 *.p12
 *.pfx
 
-# Firebase
-*firebase-adminsdk*.json
-firebase-debug.log
-.firebase/
-.firebaserc
-config/firebase/*.json
-!config/firebase/README.md
+# API Keys and Tokens (extra security)
+*apikey*
+*token*
+*secret*
 
-# Tool-specific ignores
-# Argus
-Argus/reports/
+# Tool-specific exclusions
+# ARGUS
+tools/Argus/logs/
+tools/Argus/reports/
+
 # Kraken
-Kraken/results/
-# SPIDERFOOT
-SPIDERFOOT/spiderfoot.db
+tools/Kraken/results/
+tools/Kraken/logs/
+
+# Metabigor
+tools/Metabigor/results/
+
+# RedTeam-ToolKit
+tools/RedTeam-ToolKit/reports/
+tools/RedTeam-ToolKit/logs/
+
+# Spiderfoot
+tools/Spiderfoot/logs/
+tools/Spiderfoot/cache/
+
 # Social-Analyzer
-Social-Analyzer/logs/
-# Storm-Breaker
-Storm-Breaker/storm-web/log/
-# RedTeam_ToolKit
-RedTeam_ToolKit/db.sqlite3
-RedTeam_ToolKit/media/
+tools/Social-Analyzer/logs/
+tools/Social-Analyzer/reports/
+
+# N8N Workflow data
+.n8n/
+
+# Obfuscation outputs
+*.obf
+obfuscated/
+
+# System process files
+*.pid
+*.lock
+
+# Runtime directories
+run/
+var/
+
+# Compiled binaries
+bin/
+build/
+
+# Generated documentation
+docs/build/
+docs/_build/
+
+# Ignore large binary files
+*.iso
+*.dmg
+*.img
+
+# Ignore pyarmor files
+.pyarmor/
+pyarmor_runtime*/
+dist_pyarmor/
+
+# SQLite databases
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Temporary upload files
+uploads/tmp/
