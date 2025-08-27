@@ -13,12 +13,16 @@ Welcome to the comprehensive documentation for the **LANCELOTT** framework - you
 - **[SCAFFOLDING_COMPLETE.md](SCAFFOLDING_COMPLETE.md)** - Project scaffolding completion
 - **[CONFIGURATION_GUIDE.md](CONFIGURATION_GUIDE.md)** - Complete configuration guide
 
-### Integration Documentation
+### Integration
+
+- 2025-08-28 — [TARS API Integration Complete](integration/TARS_API_INTEGRATION_COMPLETE.md)
+- 2025-08-28 — [Firebase Service Account Setup](setup/FIREBASE_SERVICE_ACCOUNT_SETUP.md) Documentation
 
 - **[FIREBASE_INTEGRATION_COMPLETE.md](FIREBASE_INTEGRATION_COMPLETE.md)** - Firebase cloud integration
 - **[FIREBASE_SERVICE_ACCOUNT_SETUP.md](FIREBASE_SERVICE_ACCOUNT_SETUP.md)** - Firebase service account setup
 - **[LANGCHAIN_INTEGRATION_SUMMARY.md](LANGCHAIN_INTEGRATION_SUMMARY.md)** - LangChain AI integration
 - **[UI_TARS_INTEGRATION_COMPLETE.md](integration/UI_TARS_INTEGRATION_COMPLETE.md)** - UI-TARS Desktop & Agent-TARS CLI integration
+- **[TARS_API_INTEGRATION_COMPLETE.md](integration/TARS_API_INTEGRATION_COMPLETE.md)** - TARS API with Firebase logging integration
 
 ### Getting Started
 
