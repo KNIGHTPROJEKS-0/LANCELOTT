@@ -3,10 +3,11 @@ Configuration settings for LANCELOTT
 Integrated with unified configuration system
 """
 
+import json
 import os
-from typing import List
+from typing import List, Union
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -27,6 +28,18 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "your-secret-key-change-this-in-production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ALLOWED_ORIGINS: List[str] = ["*"]
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def parse_allowed_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str):
+            if v.startswith("[") and v.endswith("]"):
+                try:
+                    return json.loads(v)
+                except json.JSONDecodeError:
+                    return [v]
+            return [v]
+        return v
 
     # Paths
     BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
