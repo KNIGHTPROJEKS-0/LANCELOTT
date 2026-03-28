@@ -9,7 +9,7 @@ charset-normalizer==2.0.12
 click==8.1.3
 colorama==0.4.6
 contourpy==1.0.6
-cryptography==38.0.0
+cryptography==46.0.6
 cycler==0.11.0
 defusedxml==0.7.1
 dirsearch==0.4.3.post1
@@ -51,7 +51,7 @@ python-dateutil==2.8.2
 python-decouple==3.6
 pytz==2022.7
 PyYAML==6.0
-requests==2.31.0
+requests==2.33.0
 requests-mock==1.10.0
 requests-ntlm==1.1.0
 shreder @ git+https://github.com/EntySec/Shreder
